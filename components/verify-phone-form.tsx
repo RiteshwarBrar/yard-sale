@@ -35,6 +35,7 @@ export function VerifyPhoneForm({
             return;
         }
         // Submit code logic here
+        
         alert(`Code submitted: ${code}`);
     };
     const resendCode: React.MouseEventHandler<HTMLButtonElement> = async (e) => {

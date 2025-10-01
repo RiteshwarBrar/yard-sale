@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useState } from "react";
+import { Session } from "inspector/promises";
 
 export function SignUpForm({
   className,
@@ -46,13 +47,20 @@ export function SignUpForm({
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         phone,
         password,
+        options: {
+          data: {
+            // Add any additional user metadata here
+          },
+        },
       });
       if (error) throw error;
+      // let session = data?.session as Session | null;
+      console.log("Sign-up successful:", data);
+      sessionStorage.setItem("data", data? JSON.stringify(data) : "");
       router.push("/auth/verify-phone");// Redirect to a verification page
-      // router.push("/auth/sign-up-success");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
