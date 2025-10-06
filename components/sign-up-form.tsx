@@ -60,6 +60,7 @@ export function SignUpForm({
       // let session = data?.session as Session | null;
       console.log("Sign-up successful:", data);
       sessionStorage.setItem("data", data? JSON.stringify(data) : "");
+
       router.push("/auth/verify-phone");// Redirect to a verification page
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");

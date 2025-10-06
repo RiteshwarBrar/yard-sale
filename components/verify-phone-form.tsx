@@ -8,18 +8,25 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 
 export function VerifyPhoneForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
     const [code, setCode] = useState("");
-    const [error, setError] = useState("");
+    const [error, setError] = useState<string | null>(null);
     const [message, setMessage] = useState("");
-    const [resendTimer, setResendTimer] = useState(0);
-
+    // const [resendTimer, setResendTimer] = useState(0);
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
+    const supabase = createClient();
+    const data = sessionStorage.getItem("data"); 
+    const phone = data?JSON.parse(data).user.phone:"";
+    const [isSending, setIsSending] = useState(false);
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value.replace(/\D/g, "");
         if (value.length <= 6) {
@@ -27,31 +34,65 @@ export function VerifyPhoneForm({
             setError("");
         }
     };
+    
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        setIsLoading(true);
+        setError(null);
+
         if (code.length !== 6) {
             setError("Please enter a valid 6-digit code.");
+            setIsLoading(false);
             return;
         }
         // Submit code logic here
-        
+        // const data = sessionStorage.getItem("data"); 
+        // const phone = data?JSON.parse(data).user.phone:"";
+        console.log(data);
+        try {
+          const { data, error } = await supabase.auth.verifyOtp({
+            phone: phone,
+            token: code,
+            type: "sms",
+          });
+          /////////////////work on this///////////////////////
+          if (error) throw error;
+          // let session = data?.session as Session | null;
+          console.log("Phone verification successful:", data);
+          router.push("/protected");// Redirect to a verification page
+        } catch (error: unknown) {
+          setError(error instanceof Error ? error.message : "An error occurred");
+        } finally {
+          setIsLoading(false);
+        }
         alert(`Code submitted: ${code}`);
     };
-    const resendCode: React.MouseEventHandler<HTMLButtonElement> = async (e) => {
+
+    const sendCode: React.MouseEventHandler<HTMLButtonElement> = async (e) => {
         e.preventDefault();
         e.stopPropagation();
-
+        setIsSending(true);
+        setError(null);
+        setMessage("");
         // Call your resend OTP API here
         try {
             //Resend OTP logic here
+            const { data, error } = await supabase.auth.signInWithOtp({
+              phone,
+            });
+            if (error) throw error;
+            console.log("OTP sent successfully:", data);
             // Optionally reset timer/cooldown and notify user
-            setResendTimer(60); 
+            // setResendTimer(60); 
             setMessage("OTP resent successfully!");
         } catch (error) {
             // Handle error (e.g., show notification)
-            // setMessage("Failed to resend OTP.");
+            setMessage("Failed to resend OTP.");
+            setError(error instanceof Error ? error.message : "An error occurred");
         }
+        setIsSending(false);
     }; 
 
     return (
@@ -78,13 +119,16 @@ export function VerifyPhoneForm({
               </div>
               
               {error? <p className="text-sm text-red-500">{error}</p>:<p className="text-sm text-gray-700">{message}</p>}
-              <Button type="submit" className="w-full" >
-                Verify
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isSending ? "Sending OTP" : "Send Code"}
+              </Button>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Verifying Phone Number" : "Verify"}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
                 Didn't receive the code?{" "}
-              <button onClick = {()=>{}} className="underline underline-offset-4">
+              <button onClick = {sendCode} className="underline underline-offset-4">
                 Resend Code
               </button>
             </div>
