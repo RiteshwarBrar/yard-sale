@@ -93,6 +93,14 @@ export default function NewItemForm({ createNewListing, initial }: Props) {
         setLoading(true);
         await createNewListing(data);
         setLoading(false);
+        setMedia([]);
+        setName("");
+        setMake("");
+        setModel("");
+        setDescription("");
+        setLocation("");
+        setPrice("");
+        
     };
 
     return (

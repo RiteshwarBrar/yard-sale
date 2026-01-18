@@ -15,6 +15,7 @@ export function HomepageCards({
     };
 
     const handleViewListingsButton = () => {
+    router.push("/protected/my-listings");
     };
 
     return (
