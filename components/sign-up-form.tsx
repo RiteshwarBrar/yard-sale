@@ -53,6 +53,10 @@ export function SignUpForm({
         options: {
           data: {
             // Add any additional user metadata here
+            phone,
+            user_name: 'placeholder', // Placeholder, update as needed
+            name: 'placeholder',
+            avatar_url: 'placeholder'
           },
         },
       });
