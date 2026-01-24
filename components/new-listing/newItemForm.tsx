@@ -16,6 +16,7 @@ export type NewItemData = {
   location: string;
   price: number;
   media: File[];
+  active?: boolean;
 };
 
 type Props = {
@@ -89,6 +90,7 @@ export default function NewItemForm({ createNewListing, initial }: Props) {
         condition,
         price: parsedPrice,
         media,
+        active: true,
         };
         setLoading(true);
         await createNewListing(data);

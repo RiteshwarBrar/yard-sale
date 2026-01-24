@@ -1,13 +1,13 @@
-
 "use client";
-import { ListingCard } from "@/components/my-listings/listingcard";
+import React from 'react'
 import { useEffect, useState} from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from '@/lib/supabase/client';
+import { ListingCard } from '@/components/home/listingcard';
 
-export function DisplayListings({
-    userID
+export function Listings({
+    userID 
 }: {
-    userID: string;
+    userID?: string
 }) {
     const supabase = createClient();
 
@@ -22,13 +22,12 @@ export function DisplayListings({
         const fetchListings = async () => {
             setLoading(true);
             const offset = (page - 1) * 10;
-
             const { data, error } = await supabase
                 .from('listings')
                 .select(`
                     id,
                     created_by,
-                    name:item_name,
+                    name:item_name, 
                     created_at,
                     condition,
                     make,
@@ -37,11 +36,10 @@ export function DisplayListings({
                     price,
                     location
                 `)
-                .eq('created_by', userID)
+                .neq('created_by', userID)
                 .eq('active', true)
                 .order('created_at', { ascending: false })
                 .range(offset, offset + 9);
-
             if (error) {
                 console.error("Error fetching listings:", error);
                 setErrorMsg("Failed to load listings.");
@@ -63,22 +61,20 @@ export function DisplayListings({
             setListings([]);
         }
     }, [page, userID]);
-        
+
     return (
         <div>
-            <div>
-                {loading ? (
-                    <p>Loading...</p>
-                ) : (
-                    <div>
-                        {listings.length > 0 ? listings.map((listing) => (
-                            <ListingCard key={listing.id} listing={listing} />
-                        ))
-                        : <p>No listings yet.</p>}
-                    </div>
-                )}
-            </div>
+            {loading ? (
+                <p>Loading...</p>
+            ) : (
+                <div>
+                    {listings.length > 0 ? listings.map((listing) => (
+                        <ListingCard key={listing.id} listing={listing} />
+                    ))
+                    : <p>No listings yet.</p>}
+                </div>
+            )}
             <p className="text-red-500">{errorMsg}</p>
         </div>
-    );
+    )
 }

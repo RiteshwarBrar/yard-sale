@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-
 import { createClient } from "@/lib/supabase/server";
-import {HomepageCards} from '@/components/home-page/cards';
+import {HomepageCards} from '@/components/user-page/cards';
+import { AvailableItems } from "@/components/user-page/availableitems";
 
 export default async function Page() {
   const supabase = await createClient();
@@ -16,8 +16,8 @@ export default async function Page() {
       <div className="w-full">
         <h2 className="font-bold text-3xl mb-4">Your Items</h2>
         <HomepageCards/>
-        <h2 className="font-bold text-3xl mb-4">Suggested Items</h2>
-        {/* <Products products={demo}/> */}
+        <h2 className="font-bold text-3xl mb-4">Items For Sale</h2>
+        <AvailableItems/>
       </div>
     </div>
   );
