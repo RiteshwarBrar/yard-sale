@@ -16,13 +16,14 @@ export type ListingData = {
     price: number;
     created_at: string;
     created_by: string;
+    active: boolean;
 };
 type props = {
     listing: ListingData;
 };
 
 export function ListingCard({
-  listing
+    listing
 }: props) {
 
     const [imageUrls, setImageUrls] = useState<string[]>([]);
@@ -37,15 +38,16 @@ export function ListingCard({
     const createdBy = listing.created_by;
     const router = useRouter();
     const supabase = createClient();
-    
+
 
     const handleButton = () => {
         // router.push(`/protected/listing-page/`);
-        router.push(`/protected/listing-page/${listing.id}/`);
+        const listingID = btoa(listing.id);
+        router.push(`/protected/listing-page/${listingID}/`);
         // console.log("Clicked on listing:", listing.id);
     };
 
-    async function fetchImages(){
+    async function fetchImages() {
         const folder = `${createdBy}/${listing.id}`;
 
         const { data: files, error } = await supabase
@@ -64,7 +66,7 @@ export function ListingCard({
             return [];
         }
         const filePaths = files
-            .filter((f) =>  !f.name.endsWith("/")) // Exclude folders
+            .filter((f) => !f.name.endsWith("/")) // Exclude folders
             .map((f) => `${folder}/${f.name}`);
 
         const { data: urls, error: urlError } = await supabase
@@ -91,7 +93,7 @@ export function ListingCard({
         loadImages();
     }, []);
 
-    
+
 
     const prev = () =>
         setIndex((i) => (i === 0 ? imageUrls.length - 1 : i - 1));
@@ -99,40 +101,40 @@ export function ListingCard({
         setIndex((i) => (i === imageUrls.length - 1 ? 0 : i + 1));
 
     return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 my-6">
-        <Card onClick={handleButton} className="cursor-pointer hover:shadow-lg transition-shadow">
-            <CardHeader>
-                <CardTitle>{name}</CardTitle>
-                <CardDescription>{description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-                {   
-                    imageUrls.length > 0 ? (
-                        <div>
-                            <div style={{ width: 400, height: 300, overflow: "hidden" }}>
-                                <img
-                                src={imageUrls[index]}
-                                alt={`Image ${index + 1}`}
-                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                                />
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 my-6">
+            <Card onClick={handleButton} className="cursor-pointer hover:shadow-lg transition-shadow">
+                <CardHeader>
+                    <CardTitle>{name}</CardTitle>
+                    <CardDescription>{description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {
+                        imageUrls.length > 0 ? (
+                            <div>
+                                <div style={{ width: 400, height: 300, overflow: "hidden" }}>
+                                    <img
+                                        src={imageUrls[index]}
+                                        alt={`Image ${index + 1}`}
+                                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                    />
+                                </div>
+                                <button onClick={prev}>Prev</button>
+                                <span> {index + 1} / {imageUrls.length} </span>
+                                <button onClick={next}>Next</button>
                             </div>
-                            <button onClick={prev}>Prev</button>
-                            <span> {index + 1} / {imageUrls.length} </span>
-                            <button onClick={next}>Next</button>
-                        </div>
-                    ) : (
-                        <p>No images available</p>
-                    )
-                }
-            </CardContent>
-            <CardFooter>
-                <div>
-                    <p>{location}</p>
-                    <p>${price}</p>
-                </div>
-            </CardFooter>
-        </Card>
-        
-    </div>
+                        ) : (
+                            <p>No images available</p>
+                        )
+                    }
+                </CardContent>
+                <CardFooter>
+                    <div>
+                        <p>{location}</p>
+                        <p>${price}</p>
+                    </div>
+                </CardFooter>
+            </Card>
+
+        </div>
     );
 }
