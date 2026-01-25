@@ -82,6 +82,26 @@ export function ListingPage({ listingID, userID }: { listingID: string, userID: 
         return urls.map((u) => u.signedUrl);
     };
 
+    async function createConversation() {
+        const { data, error } = await supabase
+            .from('conversations')
+            .insert([
+                {
+                    buyer_id: userID,
+                    seller_id: createdBy,
+                    listing_id: decodedID,
+                }
+            ])
+            .select()
+            .single();
+        if (error) {
+            console.error("Error creating conversation:", error);
+            return null;
+        }
+        console.log("Conversation created successfully", data);
+        return data;
+    }
+
     useEffect(() => {
         async function loadData() {
             try {
@@ -119,6 +139,7 @@ export function ListingPage({ listingID, userID }: { listingID: string, userID: 
 
     const handleContactSeller = () => {
         // Implement contact seller functionality here
+
         alert("Contact Seller functionality to be implemented.");
     }
 

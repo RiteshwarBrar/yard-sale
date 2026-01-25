@@ -1,11 +1,11 @@
 "use client";
 import React from 'react'
-import { useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { createClient } from '@/lib/supabase/client';
 import { ListingCard } from '@/components/home/listingcard';
 
 export function Listings({
-    userID 
+    userID
 }: {
     userID?: string
 }) {
@@ -48,7 +48,7 @@ export function Listings({
             }
 
             const fetchedListings = data;
-            console.log(typeof(fetchedListings));
+            console.log(typeof (fetchedListings));
             console.log(fetchedListings);
             setListings(fetchedListings);
             setLoading(false);
@@ -71,7 +71,7 @@ export function Listings({
                     {listings.length > 0 ? listings.map((listing) => (
                         <ListingCard key={listing.id} listing={listing} />
                     ))
-                    : <p>No listings yet.</p>}
+                        : <p>No listings yet.</p>}
                 </div>
             )}
             <p className="text-red-500">{errorMsg}</p>
