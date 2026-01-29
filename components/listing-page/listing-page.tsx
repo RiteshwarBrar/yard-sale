@@ -21,10 +21,10 @@ export function ListingPage({ listingID, userID }: { listingID: string, userID: 
     const [price, setPrice] = useState(0);
     const [createdAt, setCreatedAt] = useState("");
     const [createdBy, setCreatedBy] = useState("");
+    const [inTalks, setInTalks] = useState(false);
 
     const decodedID = atob(listingID);
-    // Fetch listings from your backend or database using Supabase table queries
-
+    // Fetch listings from Supabase
     async function fetchListings(): Promise<ListingData> {
         const { data, error } = await supabase
             .from('listings')
@@ -48,22 +48,20 @@ export function ListingPage({ listingID, userID }: { listingID: string, userID: 
         console.log("Listings fetched successfully", data);
         return data[0];
     };
-
+    // Fetch images from Supabase Storage
     async function fetchImages(folder: string): Promise<string[]> {
-
         const { data: files, error } = await supabase
             .storage
             .from('ListingsMedia')
             .list(folder);
 
-        console.log("Folder:", folder, "files from list():", files, "error:", error);
-        console.log("createdBy:", createdBy, "decodedID:", decodedID);
+        // console.log("Folder:", folder, "files from list():", files, "error:", error);
+        // console.log("createdBy:", createdBy, "decodedID:", decodedID);
         if (error) {
             console.error("Error fetching images:", error);
             return [];
         }
         if (!files || files.length === 0) {
-            // Nothing in this folder; bail early and AVOID calling createSignedUrls
             return [];
         }
         const filePaths = files
@@ -81,7 +79,24 @@ export function ListingPage({ listingID, userID }: { listingID: string, userID: 
         }
         return urls.map((u) => u.signedUrl);
     };
-
+    // Check if a conversation already exists
+    async function checkExistingConversation(createdBy: string) {
+        console.log("Checking existing conversation for: ", `${decodedID}`);
+        const { data, error } = await supabase
+            .from('conversations')
+            .select('*')
+            .eq('id', `${decodedID}|${createdBy}|${userID}`)
+            .single();
+        if (error) {
+            // console.log("No existing conversation found:", error);
+            setInTalks(false);
+            return;
+        }
+        // console.log("Existing conversation found:", data);
+        setInTalks(true);
+        return;
+    }
+    // Create a new conversation
     async function createConversation() {
         const { data, error } = await supabase
             .from('conversations')
@@ -100,6 +115,18 @@ export function ListingPage({ listingID, userID }: { listingID: string, userID: 
         }
         console.log("Conversation created successfully", data);
         return data;
+    }
+    // Navigation for images
+    const prev = () =>
+        setIndex((i) => (i === 0 ? imageUrls.length - 1 : i - 1));
+    const next = () =>
+        setIndex((i) => (i === imageUrls.length - 1 ? 0 : i + 1));
+
+    const handleContactSeller = () => {
+        createConversation();
+    }
+    const handleOpenChat = () => {
+        // Open chat interface
     }
 
     useEffect(() => {
@@ -120,6 +147,8 @@ export function ListingPage({ listingID, userID }: { listingID: string, userID: 
                 setImageUrls(urls);
                 setLoading(false);
 
+                await checkExistingConversation(data?.created_by);
+
             } catch (error) {
                 console.error("Error loading listing data:", error);
             }
@@ -132,16 +161,6 @@ export function ListingPage({ listingID, userID }: { listingID: string, userID: 
         }
     }, []);
 
-    const prev = () =>
-        setIndex((i) => (i === 0 ? imageUrls.length - 1 : i - 1));
-    const next = () =>
-        setIndex((i) => (i === imageUrls.length - 1 ? 0 : i + 1));
-
-    const handleContactSeller = () => {
-        // Implement contact seller functionality here
-
-        alert("Contact Seller functionality to be implemented.");
-    }
 
     return (
 
@@ -178,7 +197,10 @@ export function ListingPage({ listingID, userID }: { listingID: string, userID: 
                         <div>
                             <p>{location}</p>
                             <p>${price}</p>
-                            <Button onClick={handleContactSeller}>Contact Seller</Button>
+                            {inTalks ? (
+                                <Button className="hover:bg-green-500 z-50" onClick={handleOpenChat}>Open Chat</Button>
+                            ) : <Button className="hover:bg-blue-700 z-50" onClick={handleContactSeller}>Contact Seller</Button>}
+
                         </div>
                     </div>
                 )
