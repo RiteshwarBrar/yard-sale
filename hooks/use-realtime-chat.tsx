@@ -5,21 +5,22 @@ import { useCallback, useEffect, useState } from 'react'
 
 interface UseRealtimeChatProps {
   roomName: string
-  username: string
+  sender: string
+  receiver: string
 }
 
 export interface ChatMessage {
   id: string
-  content: string
-  user: {
-    name: string
-  }
-  createdAt: string
+  conversation_id: string
+  sender_id: string
+  receiver_id: string
+  body: string
+  created_at: string
 }
 
 const EVENT_MESSAGE_TYPE = 'message'
 
-export function useRealtimeChat({ roomName, username }: UseRealtimeChatProps) {
+export function useRealtimeChat({ roomName, sender, receiver }: UseRealtimeChatProps) {
   const supabase = createClient()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [channel, setChannel] = useState<ReturnType<typeof supabase.channel> | null>(null)
@@ -45,19 +46,19 @@ export function useRealtimeChat({ roomName, username }: UseRealtimeChatProps) {
     return () => {
       supabase.removeChannel(newChannel)
     }
-  }, [roomName, username, supabase])
+  }, [roomName, sender, receiver, supabase])
 
   const sendMessage = useCallback(
-    async (content: string) => {
+    async (body: string) => {
       if (!channel || !isConnected) return
 
       const message: ChatMessage = {
         id: crypto.randomUUID(),
-        content,
-        user: {
-          name: username,
-        },
-        createdAt: new Date().toISOString(),
+        body,
+        conversation_id: roomName,
+        sender_id: sender,
+        receiver_id: receiver,
+        created_at: new Date().toISOString(),
       }
 
       // Update local state immediately for the sender
@@ -69,7 +70,7 @@ export function useRealtimeChat({ roomName, username }: UseRealtimeChatProps) {
         payload: message,
       })
     },
-    [channel, isConnected, username]
+    [channel, isConnected, sender, receiver]
   )
 
   return { messages, sendMessage, isConnected }
