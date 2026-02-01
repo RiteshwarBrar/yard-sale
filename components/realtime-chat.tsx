@@ -3,10 +3,7 @@
 import { cn } from '@/lib/utils'
 import { ChatMessageItem } from '@/components/chat-message'
 import { useChatScroll } from '@/hooks/use-chat-scroll'
-import {
-  type ChatMessage,
-  useRealtimeChat,
-} from '@/hooks/use-realtime-chat'
+import { type ChatMessage, useRealtimeChat } from '@/hooks/use-realtime-chat'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Send } from 'lucide-react'
@@ -14,8 +11,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 interface RealtimeChatProps {
   roomName: string
-  sender: string
-  receiver: string
+  seller: { id: string; display_name: string }
+  buyer: { id: string; display_name: string }
   onMessage?: (messages: ChatMessage[]) => void
   messages?: ChatMessage[]
 }
@@ -31,8 +28,8 @@ interface RealtimeChatProps {
  */
 export const RealtimeChat = ({
   roomName,
-  sender,
-  receiver,
+  seller,
+  buyer,
   onMessage,
   messages: initialMessages = [],
 }: RealtimeChatProps) => {
@@ -44,8 +41,8 @@ export const RealtimeChat = ({
     isConnected,
   } = useRealtimeChat({
     roomName,
-    sender,
-    receiver,
+    seller,
+    buyer,
   })
   const [newMessage, setNewMessage] = useState('')
 
@@ -96,7 +93,7 @@ export const RealtimeChat = ({
         <div className="space-y-1">
           {allMessages.map((message, index) => {
             const prevMessage = index > 0 ? allMessages[index - 1] : null
-            const showHeader = !prevMessage || prevMessage.sender_id !== message.sender_id
+            const showHeader = !prevMessage || prevMessage.sender.id !== message.sender.id
 
             return (
               <div
@@ -105,7 +102,7 @@ export const RealtimeChat = ({
               >
                 <ChatMessageItem
                   message={message}
-                  isOwnMessage={message.sender_id === sender}
+                  isOwnMessage={message.sender.id === buyer.id}
                   showHeader={showHeader}
                 />
               </div>
