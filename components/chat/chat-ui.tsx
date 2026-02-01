@@ -24,7 +24,7 @@ export function ChatUI() {
     const [seller, setSeller] = useState<{ id: string; display_name: string }>({ id: "", display_name: "" });
     const [buyer, setBuyer] = useState<{ id: string; display_name: string }>({ id: "", display_name: "" });
     const [messages, setMessages] = useState<Array<any>>([]);
-
+    const [isUserSeller, setIsUserSeller] = useState(false);
 
 
     const chatVisible = CHAT_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
@@ -34,7 +34,7 @@ export function ChatUI() {
 
     useEffect(() => {
 
-        const fetchConversations = async () => {
+        const fetchConversations = async (lookFor: string) => {
             const userID = await getUserID();
             const { data, error } = await supabase
                 .from('conversations')
@@ -52,7 +52,7 @@ export function ChatUI() {
                         item_name
                     )
                     `)
-                .eq('buyer_id', userID);
+                .eq(lookFor, userID);
             if (error) {
                 console.error("Error fetching conversations:", error);
                 return;
@@ -60,20 +60,26 @@ export function ChatUI() {
             setConversations(data || []);
             console.log("Conversations fetched successfully", data);
         };
+        if (isUserSeller) {
+            fetchConversations('seller_id');
+        }
+        else {
+            fetchConversations('buyer_id');
+        }
 
-        fetchConversations();
-    }, [isOpen]);
+    }, [isOpen, isUserSeller]);
 
     useEffect(() => {
         if (!isChatroomOpen) {
             setChatRoom("");
+            setMessages([]);
+            return;
         }
-        else {
 
-            const fetchMessages = async () => {
-                const { data, error } = await supabase
-                    .from('messages')
-                    .select(`
+        const fetchMessages = async () => {
+            const { data, error } = await supabase
+                .from('messages')
+                .select(`
                     id,
                     sender:users!messages_sender_id_fkey (
                         id,
@@ -87,29 +93,29 @@ export function ChatUI() {
                     body,
                     created_at
                     `)
-                    .eq('conversation_id', chatRoom)
-                    .order('created_at', { ascending: true });
-                if (error) {
-                    console.error("Error fetching messages:", error);
-                    return;
-                }
-                setMessages(data || []);
-                const openConversation = conversations.find((conversation) => conversation.id === chatRoom);
-                if (openConversation) {
-                    setSeller({
-                        id: openConversation.seller.id,
-                        display_name: openConversation.seller.display_name || "",
-                        });
-                        setBuyer({
-                            id: openConversation.buyer.id,
-                            display_name: openConversation.buyer.display_name || "",
-                        });
-                    }
-
-                console.log("Messages fetched successfully", data);
+                .eq('conversation_id', chatRoom)
+                .order('created_at', { ascending: true });
+            if (error) {
+                console.error("Error fetching messages:", error);
+                return;
             }
-            fetchMessages();
+            setMessages(data || []);
+            const openConversation = conversations.find((conversation) => conversation.id === chatRoom);
+            if (openConversation) {
+                setSeller({
+                    id: openConversation.seller.id,
+                    display_name: openConversation.seller.display_name || "",
+                });
+                setBuyer({
+                    id: openConversation.buyer.id,
+                    display_name: openConversation.buyer.display_name || "",
+                });
+            }
+
+            console.log("Messages fetched successfully", data);
         }
+        fetchMessages();
+
     }, [isChatroomOpen, chatRoom, conversations]);
 
     return (
@@ -117,27 +123,40 @@ export function ChatUI() {
             <div className="fixed bottom-60 h-80 flex pr-4 gap-4">
                 {isChatroomOpen && (
                     <div className="bg-white p-4 border rounded shadow-lg">
-                        <RealtimeChat roomName={chatRoom} seller={seller} buyer={buyer} messages={messages}/>
+                        <RealtimeChat roomName={chatRoom} seller={seller} buyer={buyer} messages={messages} isUserSeller={isUserSeller} />
                     </div>
                 )}
                 {isOpen && (
                     <div className="bg-white border w-80 flex flex-col-reverse rounded-xl shadow-lg">
-                        {conversations.map((conversation) => (
-                            <div onClick={() => {setIsChatroomOpen(true); setChatRoom(conversation.id); }} key={conversation.id} className="pr-4 pl-4 border-t border-black hover:bg-gray-100">
-                                <p className="p-2">Conversation with {conversation.seller.display_name} about {conversation.listing.item_name}</p>
-                                <p>{conversation.id}</p>
+                        {!conversations || conversations.length === 0 ? (
+                            <div className="p-4 text-center text-sm text-muted-foreground">
+                                No conversations yet.
                             </div>
-                        ))}
+                        ) : (
+                            conversations.map((conversation) => (
+                                <div onClick={() => { setIsChatroomOpen(true); setChatRoom(conversation.id); }} key={conversation.id} className="pr-4 pl-4 border-t border-black hover:bg-gray-100">
+                                    <p className="p-2">Conversation with {isUserSeller ? conversation.buyer.display_name : conversation.seller.display_name} about {isUserSeller ? "selling" : "buying"} {conversation.listing.item_name}</p>
+                                    {/* <p>{conversation.id}</p> */}
+                                </div>
+                            ))
+                        )}
                     </div>
                 )}
             </div>
-            
-            <Button
-                onClick={() => { setIsOpen(!isOpen); setIsChatroomOpen(false);}}
-                className="fixed bottom shadow-lg hover:bg-blue-700 transition"
-            >
-                CHAT!!!
-            </Button>
+            <div className="fixed bottom-6 flex flex-row gap-4">
+                <Button
+                    onClick={() => { setIsOpen(!isOpen); setIsChatroomOpen(false); }}
+                    className="shadow-lg hover:bg-blue-700 transition"
+                >
+                    {isUserSeller ? "Seller Chat" : "Buyer Chat"}
+                </Button>
+                <Button
+                    onClick={() => { setIsUserSeller(!isUserSeller); setIsChatroomOpen(false); }}
+                    className="shadow-lg bg-blue-400 hover:bg-blue-200 text-black transition"
+                >
+                    ↺ Switch to {isUserSeller ? "Buyer" : "Seller"} View
+                </Button>
+            </div>
         </div>
     )
 }

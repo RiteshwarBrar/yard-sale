@@ -7,6 +7,7 @@ interface UseRealtimeChatProps {
   roomName: string
   seller: { id: string; display_name: string }
   buyer: { id: string; display_name: string }
+  isUserSeller: boolean
 }
 
 export interface ChatMessage {
@@ -26,7 +27,7 @@ export interface ChatMessage {
 
 const EVENT_MESSAGE_TYPE = 'message'
 
-export function useRealtimeChat({ roomName, seller, buyer }: UseRealtimeChatProps) {
+export function useRealtimeChat({ roomName, seller, buyer, isUserSeller }: UseRealtimeChatProps) {
   const supabase = createClient()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [channel, setChannel] = useState<ReturnType<typeof supabase.channel> | null>(null)
@@ -63,8 +64,8 @@ export function useRealtimeChat({ roomName, seller, buyer }: UseRealtimeChatProp
         .from('messages')
         .insert({
           conversation_id: roomName,
-          sender_id: buyer.id,
-          receiver_id: seller.id,
+          sender_id: isUserSeller ? seller.id : buyer.id,
+          receiver_id: isUserSeller ? buyer.id : seller.id,
           body,
         })
         .select(

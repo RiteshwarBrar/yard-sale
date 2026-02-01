@@ -13,6 +13,7 @@ interface RealtimeChatProps {
   roomName: string
   seller: { id: string; display_name: string }
   buyer: { id: string; display_name: string }
+  isUserSeller: boolean
   onMessage?: (messages: ChatMessage[]) => void
   messages?: ChatMessage[]
 }
@@ -30,6 +31,7 @@ export const RealtimeChat = ({
   roomName,
   seller,
   buyer,
+  isUserSeller,
   onMessage,
   messages: initialMessages = [],
 }: RealtimeChatProps) => {
@@ -43,6 +45,7 @@ export const RealtimeChat = ({
     roomName,
     seller,
     buyer,
+    isUserSeller,
   })
   const [newMessage, setNewMessage] = useState('')
 
@@ -102,7 +105,7 @@ export const RealtimeChat = ({
               >
                 <ChatMessageItem
                   message={message}
-                  isOwnMessage={message.sender.id === buyer.id}
+                  isOwnMessage={message.sender.id === (isUserSeller ? seller.id : buyer.id)}
                   showHeader={showHeader}
                 />
               </div>
