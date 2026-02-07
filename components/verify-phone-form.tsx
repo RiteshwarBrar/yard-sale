@@ -57,9 +57,9 @@ export function VerifyPhoneForm({
             token: code,
             type: "sms",
           });
-          /////////////////work on this///////////////////////
           if (error) throw error;
           // let session = data?.session as Session | null;
+          await supabase.auth.getSession(); // TO-DO if this doesn't work then explicitly update usermeta with phone_verified: true and check that in protected route
           console.log("Phone verification successful:", data);
           router.push("/protected");// Redirect to a verification page
         } catch (error: unknown) {

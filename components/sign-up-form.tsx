@@ -21,10 +21,12 @@ export function SignUpForm({
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const [phone, setPhone] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
   const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -55,7 +57,8 @@ export function SignUpForm({
             // Add any additional user metadata here
             phone,
             user_name: 'placeholder', // Placeholder, update as needed
-            name: 'placeholder',
+            firstname: 'placeholder',
+            lastname: 'placeholder',
             avatar_url: 'placeholder'
           },
         },
@@ -83,7 +86,9 @@ export function SignUpForm({
           <form onSubmit={handleSignUp}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="phone">Phone Number</Label>
+                <div className="flex items-center">
+                  <Label htmlFor="phone">Phone Number</Label>
+                </div>
                 <Input
                   id="Phone"
                   type="text"
@@ -91,6 +96,19 @@ export function SignUpForm({
                   required
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <div className="flex items-center">
+                  <Label htmlFor="username">Username</Label>
+                </div>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="e.g. john_doe"
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">
