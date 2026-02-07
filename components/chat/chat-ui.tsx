@@ -154,7 +154,7 @@ export function ChatUI() {
                     onClick={() => { setIsUserSeller(!isUserSeller); setIsChatroomOpen(false); }}
                     className="shadow-lg bg-blue-400 hover:bg-blue-200 text-black transition"
                 >
-                    ↺ Switch to {isUserSeller ? "Buyer" : "Seller"} View
+                    ↺ Switch Chat Mode
                 </Button>
             </div>
         </div>
