@@ -29,24 +29,27 @@ export default function CompleteSignUpForm() {
         e.preventDefault();
         setIsLoading(true);
         setError(null);
-        try {
-            const { data, error } = await supabase.auth.updateUser({
-                email,
-                data: {
-                    // Add any additional user metadata here
-                    firstname: firstname,
-                    lastname: lastname,
-                },
-            });
 
-        }
-        catch (error) {
-            setError("An error occurred while updating your account. Please try again.");
-            console.error("Error updating user:", error);
-        }
+        const { data, error } = await supabase.auth.updateUser({
+            data: {
+                // Add any additional user metadata here
+                firstname: firstname,
+                lastname: lastname,
+                email: email,
+            },
+        });
         setIsLoading(false);
+
+        if (error) {
+        setError("An error occurred while updating your account. Please try again.");
+        console.error("Error updating user:", error);
+        return;
+        }
+        console.log("User updated successfully:", data);
         const { data: sessionData } = await supabase.auth.getSession();
+        console.log("Updated session data:", sessionData);
         router.refresh();
+        return;
     }
     return (
         <div>

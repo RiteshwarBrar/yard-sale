@@ -9,7 +9,8 @@ export default async function ProtectedPage() {
 	if (error || !data?.claims) {
 		redirect("/auth/login");
 	}
-	console.log("User claims:", data.claims);
+	const { data: {user}} = await supabase.auth.getUser();
+	console.log("User :", user);
 	const userID = data?.claims.sub;
 
 	return (

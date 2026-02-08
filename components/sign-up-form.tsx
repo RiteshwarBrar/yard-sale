@@ -13,8 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChangeEvent, useState } from "react";
-import { Session } from "inspector/promises";
+import { useState } from "react";
 
 export function SignUpForm({
   className,
@@ -28,10 +27,10 @@ export function SignUpForm({
   const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
-
+  const supabase = createClient();
+  
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
@@ -43,7 +42,7 @@ export function SignUpForm({
 
     const phoneRegex = /^\+\d{11,15}$/;
     if (!phoneRegex.test(phone)) {
-      setError("Invalid phone number format. Use format: +1234567890");
+      setError("Invalid phone number format. Use format +12345678901 (country code + number).");
       setIsLoading(false);
       return;
     }
@@ -53,10 +52,10 @@ export function SignUpForm({
         phone,
         password,
         options: {
+          channel: "sms",
           data: {
             // Add any additional user metadata here
-            phone,
-            user_name: 'placeholder', // Placeholder, update as needed
+            user_name: username,
             firstname: 'placeholder',
             lastname: 'placeholder',
             avatar_url: 'placeholder'
@@ -66,7 +65,7 @@ export function SignUpForm({
       if (error) throw error;
       // let session = data?.session as Session | null;
       console.log("Sign-up successful:", data);
-      sessionStorage.setItem("data", data? JSON.stringify(data) : "");
+      sessionStorage.setItem("signup_phone", phone); // Store phone number for later use in verification step
       router.push("/auth/verify-phone");// Redirect to a verification page
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
@@ -90,9 +89,10 @@ export function SignUpForm({
                   <Label htmlFor="phone">Phone Number</Label>
                 </div>
                 <Input
-                  id="Phone"
+                  id="phone"
                   type="text"
                   placeholder="e.g.+1234567890"
+                  autoComplete="tel"
                   required
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
