@@ -25,8 +25,7 @@ export function VerifyPhoneForm({
     const [cooledDown, setCooledDown] = useState(true);
     const [isSending, setIsSending] = useState(false);
     const supabase = createClient();
-    const data = sessionStorage.getItem("signup_phone"); 
-    const phone = data ? JSON.parse(data) : "";
+    const phone = sessionStorage.getItem("signup_phone") || ""; // Retrieve the phone number from session storage
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value.replace(/\D/g, "");
         if (value.length <= 6) {
@@ -48,7 +47,7 @@ export function VerifyPhoneForm({
             return;
         }
 
-        console.log(data);
+        // console.log(data);
         try {
           const { data, error } = await supabase.auth.verifyOtp({
             phone: phone,

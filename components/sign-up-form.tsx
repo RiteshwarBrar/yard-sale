@@ -28,7 +28,7 @@ export function SignUpForm({
 
   const router = useRouter();
   const supabase = createClient();
-  
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -55,10 +55,7 @@ export function SignUpForm({
           channel: "sms",
           data: {
             // Add any additional user metadata here
-            user_name: username,
-            firstname: 'placeholder',
-            lastname: 'placeholder',
-            avatar_url: 'placeholder'
+            user_name: username
           },
         },
       });
@@ -69,6 +66,7 @@ export function SignUpForm({
       router.push("/auth/verify-phone");// Redirect to a verification page
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
+      console.error("Error during sign-up:", error);
     } finally {
       setIsLoading(false);
     }

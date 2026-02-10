@@ -136,7 +136,6 @@ export function ChatUI() {
                             conversations.map((conversation) => (
                                 <div onClick={() => { setIsChatroomOpen(true); setChatRoom(conversation.id); }} key={conversation.id} className="pr-4 pl-4 border-t border-black hover:bg-gray-100">
                                     <p className="p-2">Conversation with {isUserSeller ? conversation.buyer.display_name : conversation.seller.display_name} about {isUserSeller ? "selling" : "buying"} {conversation.listing.item_name}</p>
-                                    {/* <p>{conversation.id}</p> */}
                                 </div>
                             ))
                         )}

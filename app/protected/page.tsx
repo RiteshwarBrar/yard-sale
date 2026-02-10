@@ -15,7 +15,7 @@ export default async function ProtectedPage() {
 
 	return (
 		<div className="flex-1 w-full flex flex-col gap-12">
-			{!data.claims.email || data.claims.email === "" ? (
+			{!user?.user_metadata.email || user?.user_metadata.email === "" ? (
 				<CompleteSignUpPrompt />
 			) : (
 				<h1 className="text-3xl font-bold">Welcome to the protected page!</h1>
