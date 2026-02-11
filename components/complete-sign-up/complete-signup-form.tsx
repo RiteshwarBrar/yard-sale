@@ -39,6 +39,7 @@ export default function CompleteSignUpForm() {
             },
         });
         setIsLoading(false);
+        
 
         if (error) {
         setError("An error occurred while updating your account. Please try again.");
