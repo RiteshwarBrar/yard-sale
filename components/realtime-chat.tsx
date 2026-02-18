@@ -11,8 +11,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 interface RealtimeChatProps {
   roomName: string
-  seller: { id: string; display_name: string }
-  buyer: { id: string; display_name: string }
+  seller: { id: string; user_name: string }
+  buyer: { id: string; user_name: string }
   isUserSeller: boolean
   onMessage?: (messages: ChatMessage[]) => void
   messages?: ChatMessage[]

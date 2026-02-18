@@ -13,23 +13,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChangeEvent, useState } from "react";
-import { Session } from "inspector/promises";
+import { useState } from "react";
 
 export function SignUpForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const [phone, setPhone] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
   const router = useRouter();
+  const supabase = createClient();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
@@ -41,7 +42,7 @@ export function SignUpForm({
 
     const phoneRegex = /^\+\d{11,15}$/;
     if (!phoneRegex.test(phone)) {
-      setError("Invalid phone number format. Use format: +1234567890");
+      setError("Invalid phone number format. Use format +12345678901 (country code + number).");
       setIsLoading(false);
       return;
     }
@@ -51,22 +52,21 @@ export function SignUpForm({
         phone,
         password,
         options: {
+          channel: "sms",
           data: {
             // Add any additional user metadata here
-            phone,
-            user_name: 'placeholder', // Placeholder, update as needed
-            name: 'placeholder',
-            avatar_url: 'placeholder'
+            user_name: username
           },
         },
       });
       if (error) throw error;
       // let session = data?.session as Session | null;
       console.log("Sign-up successful:", data);
-      sessionStorage.setItem("data", data? JSON.stringify(data) : "");
+      sessionStorage.setItem("signup_phone", phone); // Store phone number for later use in verification step
       router.push("/auth/verify-phone");// Redirect to a verification page
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
+      console.error("Error during sign-up:", error);
     } finally {
       setIsLoading(false);
     }
@@ -83,14 +83,30 @@ export function SignUpForm({
           <form onSubmit={handleSignUp}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="phone">Phone Number</Label>
+                <div className="flex items-center">
+                  <Label htmlFor="phone">Phone Number</Label>
+                </div>
                 <Input
-                  id="Phone"
+                  id="phone"
                   type="text"
                   placeholder="e.g.+1234567890"
+                  autoComplete="tel"
                   required
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <div className="flex items-center">
+                  <Label htmlFor="username">Username</Label>
+                </div>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="e.g. john_doe"
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">

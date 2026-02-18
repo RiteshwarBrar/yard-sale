@@ -5,8 +5,8 @@ import { useCallback, useEffect, useState } from 'react'
 
 interface UseRealtimeChatProps {
   roomName: string
-  seller: { id: string; display_name: string }
-  buyer: { id: string; display_name: string }
+  seller: { id: string; user_name: string }
+  buyer: { id: string; user_name: string }
   isUserSeller: boolean
 }
 
@@ -15,11 +15,11 @@ export interface ChatMessage {
   conversation_id: string
   sender: {
     id: string;
-    display_name: string;
+    user_name: string;
   }
   receiver: {
     id: string;
-    display_name: string;
+    user_name: string;
   }
   body: string
   created_at: string
@@ -73,11 +73,11 @@ export function useRealtimeChat({ roomName, seller, buyer, isUserSeller }: UseRe
           id,
           sender:users!messages_sender_id_fkey (
               id,
-              display_name
+              user_name
           ),
           receiver:users!messages_receiver_id_fkey (
               id,
-              display_name
+              user_name
           ),
           conversation_id,
           body,
@@ -92,8 +92,8 @@ export function useRealtimeChat({ roomName, seller, buyer, isUserSeller }: UseRe
 
       const normalizedData = (raw: any) => ({
         id: raw.id,
-        sender: { id: raw.sender.id, display_name: raw.sender.display_name },
-        receiver: { id: raw.receiver.id, display_name: raw.receiver.display_name },
+        sender: { id: raw.sender.id, user_name: raw.sender.user_name },
+        receiver: { id: raw.receiver.id, user_name: raw.receiver.user_name },
         conversation_id: raw.conversation_id,
         body: raw.body,
         created_at: raw.created_at,

@@ -21,8 +21,8 @@ export function ChatUI() {
     const [isChatroomOpen, setIsChatroomOpen] = useState(false);
     const [conversations, setConversations] = useState<Array<any>>([]);
     const [chatRoom, setChatRoom] = useState<string>("");
-    const [seller, setSeller] = useState<{ id: string; display_name: string }>({ id: "", display_name: "" });
-    const [buyer, setBuyer] = useState<{ id: string; display_name: string }>({ id: "", display_name: "" });
+    const [seller, setSeller] = useState<{ id: string; user_name: string }>({ id: "", user_name: "" });
+    const [buyer, setBuyer] = useState<{ id: string; user_name: string }>({ id: "", user_name: "" });
     const [messages, setMessages] = useState<Array<any>>([]);
     const [isUserSeller, setIsUserSeller] = useState(false);
 
@@ -42,11 +42,11 @@ export function ChatUI() {
                     id,
                     seller:users!conversations_seller_id_fkey (
                         id,
-                        display_name
+                        user_name
                     ),
                     buyer:users!conversations_buyer_id_fkey (
                         id,
-                        display_name
+                        user_name
                     ),
                     listing:listings!conversations_listing_id_fkey (
                         item_name
@@ -83,11 +83,11 @@ export function ChatUI() {
                     id,
                     sender:users!messages_sender_id_fkey (
                         id,
-                        display_name
+                        user_name
                     ),
                     receiver:users!messages_receiver_id_fkey (
                         id,
-                        display_name
+                        user_name
                     ),
                     conversation_id,
                     body,
@@ -104,11 +104,11 @@ export function ChatUI() {
             if (openConversation) {
                 setSeller({
                     id: openConversation.seller.id,
-                    display_name: openConversation.seller.display_name || "",
+                    user_name: openConversation.seller.user_name || "",
                 });
                 setBuyer({
                     id: openConversation.buyer.id,
-                    display_name: openConversation.buyer.display_name || "",
+                    user_name: openConversation.buyer.user_name || "",
                 });
             }
 
@@ -135,8 +135,7 @@ export function ChatUI() {
                         ) : (
                             conversations.map((conversation) => (
                                 <div onClick={() => { setIsChatroomOpen(true); setChatRoom(conversation.id); }} key={conversation.id} className="pr-4 pl-4 border-t border-black hover:bg-gray-100">
-                                    <p className="p-2">Conversation with {isUserSeller ? conversation.buyer.display_name : conversation.seller.display_name} about {isUserSeller ? "selling" : "buying"} {conversation.listing.item_name}</p>
-                                    {/* <p>{conversation.id}</p> */}
+                                    <p className="p-2">Conversation with {isUserSeller ? conversation.buyer.user_name : conversation.seller.user_name} about {isUserSeller ? "selling" : "buying"} {conversation.listing.item_name}</p>
                                 </div>
                             ))
                         )}
