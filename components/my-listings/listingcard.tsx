@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 export type ListingData = {
     id: string;
     name: string;
+    active: boolean;
     make: string;
     model: string;
     description: string;
@@ -27,6 +28,7 @@ export function ListingCard({
 
     const [imageUrls, setImageUrls] = useState<string[]>([]);
     const [index, setIndex] = useState(0);
+    const isActive = listing.active;
     const name = listing.name;
     const make = listing.make;
     const model = listing.model;
@@ -91,7 +93,20 @@ export function ListingCard({
         loadImages();
     }, []);
 
-    
+    const handleArchiveRestore = async (isActive: boolean) => {
+        const { data, error } = await supabase
+            .from('listings')
+            .update({ active: !isActive })
+            .eq('id', listing.id);
+        if (error) {
+            console.error("Error marking listing as sold:", error);
+            return;
+        }   
+        // Optionally, you could also redirect the user or update the UI to reflect the change
+        console.log("Listing marked as sold successfully:", data);
+        router.refresh(); // Refresh the page to show the updated listing status
+        // review refresh and loading
+    };    
 
     const prev = () =>
         setIndex((i) => (i === 0 ? imageUrls.length - 1 : i - 1));
@@ -127,8 +142,16 @@ export function ListingCard({
                 <p>{location}</p>
                 <p>${price}</p>
             </CardContent>
-            {/* <CardFooter>
-            </CardFooter> */}
+            <CardFooter>
+                <div className="w-full flex justify-between items-center">
+                    <div className="text-sm text-muted-foreground">
+                        Posted on {new Date(createdAt).toLocaleDateString()}
+                    </div>
+                    <Button variant="outline" onClick={() => router.push(`/listings/${listing.id}`)}>View Details</Button>
+                <Button variant="outline" onClick={() => handleArchiveRestore(isActive)}>{isActive ? "Mark as Sold" : "Restore Listing"}</Button>
+                </div>
+                {/* <Button variant="outline" onClick={() => router.push(`/listings/${listing.id}/edit`)}>Edit Listing</Button> */}
+            </CardFooter>
         </Card>
         
     </div>

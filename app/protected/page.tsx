@@ -10,7 +10,7 @@ export default async function ProtectedPage() {
 		redirect("/auth/login");
 	}
 	const { data: {user}} = await supabase.auth.getUser();
-	console.log("User :", user);
+	// console.log("User :", user);
 	const userID = data?.claims.sub;
 
 	return (
@@ -18,7 +18,7 @@ export default async function ProtectedPage() {
 			{!user?.user_metadata.email || user?.user_metadata.email === "" ? (
 				<CompleteSignUpPrompt />
 			) : (
-				<h1 className="text-3xl font-bold">Welcome to the protected page!</h1>
+				<h1 className="text-3xl font-bold">Welcome to your home page!</h1>
 			)}
 			<Listings userID={userID} />
 		</div>

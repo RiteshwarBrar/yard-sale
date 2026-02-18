@@ -4,6 +4,7 @@ import React, { useEffect, useState, ChangeEvent, FormEvent, useActionState, sta
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 
 
@@ -25,6 +26,8 @@ type Props = {
 };
 
 export default function NewItemForm({ createNewListing, initial }: Props) {
+
+    const router = useRouter();
     const [name, setName] = useState(initial?.name ?? "");
     const [condition, setCondition] = useState<NewItemData["condition"]>(
         initial?.condition ?? "Good"
@@ -102,6 +105,7 @@ export default function NewItemForm({ createNewListing, initial }: Props) {
         setDescription("");
         setLocation("");
         setPrice("");
+        router.back();
         
     };
 

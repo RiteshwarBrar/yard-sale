@@ -1,7 +1,7 @@
 import React from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { DisplayListings } from "@/components/my-listings/displaylistings";
+import { DisplayListings } from "@/components/my-listings/displayUsersListings";
 
 export default async function Page() {
 
@@ -17,7 +17,6 @@ export default async function Page() {
         <div>
             <h1>My Listings</h1>
             <DisplayListings userID={userID} />
-
         </div>
     );
 }

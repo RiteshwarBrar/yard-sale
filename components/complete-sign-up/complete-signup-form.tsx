@@ -32,10 +32,10 @@ export default function CompleteSignUpForm() {
 
         const { data, error } = await supabase.auth.updateUser({
             data: {
-                // Add any additional user metadata here
                 firstname: firstname,
                 lastname: lastname,
                 email: email,
+                phone_verified: true,
             },
         });
         setIsLoading(false);
