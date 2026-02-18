@@ -1,5 +1,5 @@
 import React from "react";
-import NewItemForm from "@/components/new-listing/newItemForm";
+import NewItemForm from "@/components/create-listing/newListingForm";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createListing } from "@/app/actions";

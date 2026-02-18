@@ -3,6 +3,8 @@ import React from 'react'
 import { useEffect, useState } from "react";
 import { createClient } from '@/lib/supabase/client';
 import { ListingCard } from '@/components/home/listingcard';
+import { Button } from '../ui/button';
+import { useRouter } from 'next/navigation';
 
 export function Listings({
     userID
@@ -10,6 +12,7 @@ export function Listings({
     userID?: string
 }) {
     const supabase = createClient();
+    const router = useRouter();
 
     const [page, setPage] = useState(1);
     const [listings, setListings] = useState<Array<any>>([]);
@@ -68,6 +71,7 @@ export function Listings({
                 <p>Loading...</p>
             ) : (
                 <div>
+                    <Button onClick={() => router.push("/protected/create-listing")}>Create new listing</Button>
                     {listings.length > 0 ? listings.map((listing) => (
                         <ListingCard key={listing.id} listing={listing} />
                     ))
