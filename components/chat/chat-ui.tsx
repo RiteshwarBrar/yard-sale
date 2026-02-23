@@ -21,6 +21,7 @@ export function ChatUI() {
     const [isChatroomOpen, setIsChatroomOpen] = useState(false);
     const [conversations, setConversations] = useState<Array<any>>([]);
     const [chatRoom, setChatRoom] = useState<string>("");
+    const [pendingOffers, setPendingOffers] = useState(false);
     const [seller, setSeller] = useState<{ id: string; user_name: string }>({ id: "", user_name: "" });
     const [buyer, setBuyer] = useState<{ id: string; user_name: string }>({ id: "", user_name: "" });
     const [messages, setMessages] = useState<Array<any>>([]);
@@ -40,6 +41,7 @@ export function ChatUI() {
                 .from('conversations')
                 .select(`
                     id,
+                    pending_offers,
                     seller:users!conversations_seller_id_fkey (
                         id,
                         user_name
@@ -69,6 +71,34 @@ export function ChatUI() {
 
     }, [isOpen, isUserSeller]);
 
+    const updatePendingOffersStatus = async (conversationID: string, status: boolean) => {
+        const { data, error } = await supabase
+            .from('conversations')
+            .update({ pending_offers: status })
+            .eq('id', conversationID);
+        if (error) {
+            console.error("Error updating pending offers status:", error);
+            return;
+        }
+        setPendingOffers(status);
+    };
+
+    const updateOfferStatus = async (messageID: string, status: string) => {
+        const { data, error } = await supabase
+            .from('messages')
+            .update({ status })
+            .eq('id', messageID);
+        if (error) {
+            console.error("Error updating offer status:", error);
+            return;
+        }
+        setMessages((prevMessages) =>
+            prevMessages.map((msg) =>
+                msg.id === messageID ? { ...msg, status } : msg
+            )
+        );
+    }
+
     useEffect(() => {
         if (!isChatroomOpen) {
             setChatRoom("");
@@ -91,6 +121,8 @@ export function ChatUI() {
                     ),
                     conversation_id,
                     body,
+                    type,
+                    status,
                     created_at
                     `)
                 .eq('conversation_id', chatRoom)
@@ -119,11 +151,20 @@ export function ChatUI() {
     }, [isChatroomOpen, chatRoom, conversations]);
 
     return (
-        <div className="sticky bottom-6 right-6 h-96 z-40 flex flex-col items-end gap-4">
-            <div className="fixed bottom-60 h-80 flex pr-4 gap-4">
+        <div className="z-50 bottom-6 right-6 flex flex-col items-end gap-4">
+            <div className="bottom-60 h-80 flex pr-4 gap-4">
                 {isChatroomOpen && (
                     <div className="bg-white p-4 border rounded shadow-lg">
-                        <RealtimeChat roomName={chatRoom} seller={seller} buyer={buyer} messages={messages} isUserSeller={isUserSeller} />
+                        <RealtimeChat 
+                        roomName={chatRoom}
+                        seller={seller}
+                        buyer={buyer}
+                        messages={messages}
+                        isUserSeller={isUserSeller}
+                        pendingOffers={pendingOffers}
+                        updatePendingOffersStatus={updatePendingOffersStatus}
+                        updateOfferStatus={updateOfferStatus}
+                        />
                     </div>
                 )}
                 {isOpen && (
@@ -134,7 +175,7 @@ export function ChatUI() {
                             </div>
                         ) : (
                             conversations.map((conversation) => (
-                                <div onClick={() => { setIsChatroomOpen(true); setChatRoom(conversation.id); }} key={conversation.id} className="pr-4 pl-4 border-t border-black hover:bg-gray-100">
+                                <div onClick={() => { setIsChatroomOpen(true); setChatRoom(conversation.id); setPendingOffers(conversation.pending_offers); }} key={conversation.id} className="pr-4 pl-4 border-t border-black hover:bg-gray-100">
                                     <p className="p-2">Conversation with {isUserSeller ? conversation.buyer.user_name : conversation.seller.user_name} about {isUserSeller ? "selling" : "buying"} {conversation.listing.item_name}</p>
                                 </div>
                             ))
@@ -142,7 +183,7 @@ export function ChatUI() {
                     </div>
                 )}
             </div>
-            <div className="fixed bottom-6 flex flex-row gap-4">
+            <div className="bottom-6 flex flex-row gap-4">
                 <Button
                     onClick={() => { setIsOpen(!isOpen); setIsChatroomOpen(false); }}
                     className="shadow-lg hover:bg-blue-700 transition"

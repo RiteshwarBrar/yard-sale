@@ -4,10 +4,12 @@ import type { ChatMessage } from '@/hooks/use-realtime-chat'
 interface ChatMessageItemProps {
   message: ChatMessage
   isOwnMessage: boolean
-  showHeader: boolean
+  showUsername: boolean
+  showTime: boolean
 }
 
-export const ChatMessageItem = ({ message, isOwnMessage, showHeader }: ChatMessageItemProps) => {
+export const ChatMessageItem = ({ message, isOwnMessage, showUsername, showTime }: ChatMessageItemProps) => {
+  // console.log("Message", message, "Show time", showTime)
   return (
     <div className={`flex mt-2 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
       <div
@@ -15,13 +17,13 @@ export const ChatMessageItem = ({ message, isOwnMessage, showHeader }: ChatMessa
           'items-end': isOwnMessage,
         })}
       >
-        {showHeader && (
+        {showTime && (
           <div
             className={cn('flex items-center gap-2 text-xs px-3', {
               'justify-end flex-row-reverse': isOwnMessage,
             })}
           >
-            <span className={'font-medium'}>{message.sender.user_name}</span>
+            {showUsername && <span className={'font-medium'}>{message.sender.user_name}</span>}
             <span className="text-foreground/50 text-xs">
               {new Date(message.created_at).toLocaleTimeString('en-US', {
                 hour: '2-digit',

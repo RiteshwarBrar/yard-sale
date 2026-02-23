@@ -21,8 +21,10 @@ export interface ChatMessage {
     id: string;
     user_name: string;
   }
-  body: string
-  created_at: string
+  body: string;
+  type: string;
+  status: string;
+  created_at: string;
 }
 
 const EVENT_MESSAGE_TYPE = 'message'
@@ -56,7 +58,7 @@ export function useRealtimeChat({ roomName, seller, buyer, isUserSeller }: UseRe
   }, [roomName, seller, buyer, supabase])
 
   const sendMessage = useCallback(
-    async (body: string) => {
+    async (body: string, type?: string) => {
       if (!channel || !isConnected) return;
       if (!buyer.id || !seller.id) return;
 
@@ -67,6 +69,7 @@ export function useRealtimeChat({ roomName, seller, buyer, isUserSeller }: UseRe
           sender_id: isUserSeller ? seller.id : buyer.id,
           receiver_id: isUserSeller ? buyer.id : seller.id,
           body,
+          type: type || 'text',
         })
         .select(
           `
@@ -81,6 +84,8 @@ export function useRealtimeChat({ roomName, seller, buyer, isUserSeller }: UseRe
           ),
           conversation_id,
           body,
+          type,
+          status,
           created_at
         `
         ).single();
@@ -96,6 +101,8 @@ export function useRealtimeChat({ roomName, seller, buyer, isUserSeller }: UseRe
         receiver: { id: raw.receiver.id, user_name: raw.receiver.user_name },
         conversation_id: raw.conversation_id,
         body: raw.body,
+        type: raw.type,
+        status: raw.status,
         created_at: raw.created_at,
       });
 

@@ -2,18 +2,23 @@
 
 import { cn } from '@/lib/utils'
 import { ChatMessageItem } from '@/components/chat-message'
+import { ChatOfferItem } from '@/components/chat-offer'
 import { useChatScroll } from '@/hooks/use-chat-scroll'
 import { type ChatMessage, useRealtimeChat } from '@/hooks/use-realtime-chat'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Send } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Chat } from './chat/chat'
 
 interface RealtimeChatProps {
   roomName: string
   seller: { id: string; user_name: string }
   buyer: { id: string; user_name: string }
   isUserSeller: boolean
+  pendingOffers?: boolean
+  updateOfferStatus?: (offerID: string, status: "accepted" | "rejected" | "cancelled" | "pending") => Promise<void>
+  updatePendingOffersStatus?: (chatRoom: string, status: boolean) => Promise<void>
   onMessage?: (messages: ChatMessage[]) => void
   messages?: ChatMessage[]
 }
@@ -32,7 +37,10 @@ export const RealtimeChat = ({
   seller,
   buyer,
   isUserSeller,
+  pendingOffers,
   onMessage,
+  updatePendingOffersStatus,
+  updateOfferStatus,
   messages: initialMessages = [],
 }: RealtimeChatProps) => {
   const { containerRef, scrollToBottom } = useChatScroll()
@@ -48,6 +56,8 @@ export const RealtimeChat = ({
     isUserSeller,
   })
   const [newMessage, setNewMessage] = useState('')
+  const [showOfferWindow, setShowOfferWindow] = useState(false)
+  const [newOffer, setNewOffer] = useState(0)
 
   // Merge realtime messages with initial messages
   const allMessages = useMemo(() => {
@@ -83,6 +93,17 @@ export const RealtimeChat = ({
     },
     [newMessage, isConnected, sendMessage]
   )
+  const handleSendOffer = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault()
+      if (newOffer==0 || !isConnected) return
+      sendMessage(newOffer.toString(), 'offer')
+      setNewOffer(0)
+      setShowOfferWindow(false)
+    },
+    [newOffer, isConnected, sendMessage]
+  )
+
 
   return (
     <div className="flex flex-col h-full w-full bg-background text-foreground antialiased">
@@ -96,25 +117,80 @@ export const RealtimeChat = ({
         <div className="space-y-1">
           {allMessages.map((message, index) => {
             const prevMessage = index > 0 ? allMessages[index - 1] : null
-            const showHeader = !prevMessage || prevMessage.sender.id !== message.sender.id
-
+            const showUsername = !prevMessage || prevMessage.sender.id !== message.sender.id
+            const showTime = !prevMessage || prevMessage.sender.id !== message.sender.id || ((new Date(message.created_at).getTime()/60000) - (new Date(prevMessage.created_at).getTime()/60000)) <= 1
+            
+            // console.log("Previous message", prevMessage && (new Date(message.created_at).getTime()/60000) - (new Date(prevMessage.created_at).getTime()/60000))
             return (
               <div
                 key={message.id}
                 className="animate-in fade-in slide-in-from-bottom-4 duration-300"
               >
-                <ChatMessageItem
-                  message={message}
-                  isOwnMessage={message.sender.id === (isUserSeller ? seller.id : buyer.id)}
-                  showHeader={showHeader}
-                />
+                {message.type === 'offer' ? (
+                  <ChatOfferItem
+                    message={message}
+                    isOwnMessage={message.sender.id === (isUserSeller ? seller.id : buyer.id)}
+                    showUsername={showUsername}
+                    updatePendingOffersStatus={updatePendingOffersStatus ? (status:boolean) => updatePendingOffersStatus(roomName, status) : undefined}
+                    updateOfferStatus = {updateOfferStatus? (status:"accepted" | "rejected" | "cancelled" | "pending") => updateOfferStatus(message.id, status): undefined
+                    }
+                  />
+                ):<ChatMessageItem
+                    message={message}
+                    isOwnMessage={message.sender.id === (isUserSeller ? seller.id : buyer.id)}
+                    showUsername={showUsername}
+                    showTime={showTime}
+                  />}
+                
               </div>
             )
           })}
         </div>
       </div>
+      {showOfferWindow && (
+        <div className="inset-0 z-50 flex items-center justify-center">
+          <div className="w-[90%] max-w-sm rounded-3xl bg-[#1c1c1e] px-5 py-4 shadow-xl">
+            <div className="mb-2 flex items-center justify-between">
+              <h1 className="text-lg text-white">$</h1>
+              <Input
+                className="rounded-full bg-background text-sm p-2transition-all duration-300"
+                type="number"
+                value={newOffer}
+                onChange={(e) => setNewOffer(Number(e.target.value))}
+                placeholder="Enter offer amount..."
+                disabled={!isConnected}
+              />
+              {isConnected && newOffer && (
+                <Button
+                  className="aspect-square rounded-full animate-in fade-in slide-in-from-right-4 duration-300"
+                  onClick={handleSendOffer}
+                  disabled={!isConnected}
+                >
+                  <Send className="size-4" />
+                </Button>
+              )}
+              <button
+                onClick={() => setShowOfferWindow(false)}
+                className="text-sm font-medium text-gray-400 hover:text-gray-200 p-2 transition"
+              >
+                x
+              </button>
+            </div>
 
+    
+          </div>
+        </div>
+      )}
       <form onSubmit={handleSendMessage} className="flex w-full gap-2 border-t border-border p-4">
+        {!isUserSeller &&
+        <Button
+          className="aspect-square rounded-full animate-in fade-in slide-in-from-right-4 duration-300"
+          onClick={() => setShowOfferWindow(true)}
+          disabled={!isConnected || !pendingOffers}
+        >
+          $
+        </Button>
+        }
         <Input
           className={cn(
             'rounded-full bg-background text-sm transition-all duration-300',
