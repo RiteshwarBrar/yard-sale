@@ -1,8 +1,8 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { ChatMessageItem } from '@/components/chat-message'
-import { ChatOfferItem } from '@/components/chat-offer'
+import { ChatMessageItem } from '@/components/chat/chat-message'
+import { ChatOfferItem } from '@/components/chat/chat-offer'
 import { useChatScroll } from '@/hooks/use-chat-scroll'
 import { type ChatMessage, useRealtimeChat } from '@/hooks/use-realtime-chat'
 import { Button } from '@/components/ui/button'
@@ -17,7 +17,7 @@ interface RealtimeChatProps {
   buyer: { id: string; user_name: string }
   isUserSeller: boolean
   pendingOffers?: boolean
-  updateOfferStatus?: (offerID: string, status: "accepted" | "rejected" | "cancelled" | "pending") => Promise<void>
+  updateOfferStatus?: (offerID: string, status: "Accepted" | "Rejected" | "Cancelled" | "Pending" | "Countered") => Promise<void>
   updatePendingOffersStatus?: (chatRoom: string, status: boolean) => Promise<void>
   onMessage?: (messages: ChatMessage[]) => void
   messages?: ChatMessage[]
@@ -57,6 +57,8 @@ export const RealtimeChat = ({
   })
   const [newMessage, setNewMessage] = useState('')
   const [showOfferWindow, setShowOfferWindow] = useState(false)
+  const [showCounterOfferWindow, setShowCounterOfferWindow] = useState(false)
+  const [prevOffer, setPrevOffer] = useState<ChatMessage | null>(null)
   const [newOffer, setNewOffer] = useState(0)
 
   // Merge realtime messages with initial messages
@@ -96,14 +98,24 @@ export const RealtimeChat = ({
   const handleSendOffer = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
-      if (newOffer==0 || !isConnected) return
+      if (newOffer == 0 || !isConnected) return
       sendMessage(newOffer.toString(), 'offer')
+      updatePendingOffersStatus && updatePendingOffersStatus(roomName, true)
       setNewOffer(0)
       setShowOfferWindow(false)
+      if (updateOfferStatus && prevOffer) {
+        updateOfferStatus(prevOffer.id, "Countered")
+        setPrevOffer(null)
+      }
     },
     [newOffer, isConnected, sendMessage]
   )
 
+  const processCounterOffer = (prevOffer: ChatMessage) => {
+    setPrevOffer(prevOffer)
+    setShowOfferWindow(true)
+    return;
+  }
 
   return (
     <div className="flex flex-col h-full w-full bg-background text-foreground antialiased">
@@ -118,8 +130,8 @@ export const RealtimeChat = ({
           {allMessages.map((message, index) => {
             const prevMessage = index > 0 ? allMessages[index - 1] : null
             const showUsername = !prevMessage || prevMessage.sender.id !== message.sender.id
-            const showTime = !prevMessage || prevMessage.sender.id !== message.sender.id || ((new Date(message.created_at).getTime()/60000) - (new Date(prevMessage.created_at).getTime()/60000)) <= 1
-            
+            const showTime = !prevMessage || prevMessage.sender.id !== message.sender.id || ((new Date(message.created_at).getTime() / 60000) - (new Date(prevMessage.created_at).getTime() / 60000)) <= 1
+
             // console.log("Previous message", prevMessage && (new Date(message.created_at).getTime()/60000) - (new Date(prevMessage.created_at).getTime()/60000))
             return (
               <div
@@ -127,21 +139,23 @@ export const RealtimeChat = ({
                 className="animate-in fade-in slide-in-from-bottom-4 duration-300"
               >
                 {message.type === 'offer' ? (
-                  <ChatOfferItem
-                    message={message}
-                    isOwnMessage={message.sender.id === (isUserSeller ? seller.id : buyer.id)}
-                    showUsername={showUsername}
-                    updatePendingOffersStatus={updatePendingOffersStatus ? (status:boolean) => updatePendingOffersStatus(roomName, status) : undefined}
-                    updateOfferStatus = {updateOfferStatus? (status:"accepted" | "rejected" | "cancelled" | "pending") => updateOfferStatus(message.id, status): undefined
-                    }
-                  />
-                ):<ChatMessageItem
-                    message={message}
-                    isOwnMessage={message.sender.id === (isUserSeller ? seller.id : buyer.id)}
-                    showUsername={showUsername}
-                    showTime={showTime}
-                  />}
-                
+                  message.status === "Cancelled" ?
+                    <div className="text-xs text-muted-foreground">An offer was cancelled by {message.sender.user_name}</div> :
+                    <ChatOfferItem
+                      message={message}
+                      isOwnMessage={message.sender.id === (isUserSeller ? seller.id : buyer.id)}
+                      showUsername={showUsername}
+                      updatePendingOffersStatus={updatePendingOffersStatus ? (status: boolean) => updatePendingOffersStatus(roomName, status) : undefined}
+                      updateOfferStatus={updateOfferStatus ? (status: "Accepted" | "Rejected" | "Cancelled" | "Pending" | "Countered") => updateOfferStatus(message.id, status) : undefined}
+                      processCounterOffer={processCounterOffer ? (message: ChatMessage) => processCounterOffer(message) : undefined}
+                    />
+                ) : <ChatMessageItem
+                  message={message}
+                  isOwnMessage={message.sender.id === (isUserSeller ? seller.id : buyer.id)}
+                  showUsername={showUsername}
+                  showTime={showTime}
+                />}
+
               </div>
             )
           })}
@@ -170,26 +184,29 @@ export const RealtimeChat = ({
                 </Button>
               )}
               <button
-                onClick={() => setShowOfferWindow(false)}
+                onClick={() => {
+                  setShowOfferWindow(false)
+                  setPrevOffer(null)
+                }}
                 className="text-sm font-medium text-gray-400 hover:text-gray-200 p-2 transition"
               >
                 x
               </button>
             </div>
 
-    
+
           </div>
         </div>
       )}
       <form onSubmit={handleSendMessage} className="flex w-full gap-2 border-t border-border p-4">
         {!isUserSeller &&
-        <Button
-          className="aspect-square rounded-full animate-in fade-in slide-in-from-right-4 duration-300"
-          onClick={() => setShowOfferWindow(true)}
-          disabled={!isConnected || !pendingOffers}
-        >
-          $
-        </Button>
+          <Button
+            className="aspect-square rounded-full animate-in fade-in slide-in-from-right-4 duration-300"
+            onClick={() => setShowOfferWindow(true)}
+            disabled={!isConnected || pendingOffers}
+          >
+            $
+          </Button>
         }
         <Input
           className={cn(

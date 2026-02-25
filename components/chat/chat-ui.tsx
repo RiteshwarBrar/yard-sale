@@ -154,7 +154,7 @@ export function ChatUI() {
         <div className="z-50 bottom-6 right-6 flex flex-col items-end gap-4">
             <div className="bottom-60 h-80 flex pr-4 gap-4">
                 {isChatroomOpen && (
-                    <div className="bg-white p-4 border rounded shadow-lg">
+                    <div className="bg-white p-4 border rounded-xl shadow-lg">
                         <RealtimeChat 
                         roomName={chatRoom}
                         seller={seller}
