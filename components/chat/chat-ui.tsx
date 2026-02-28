@@ -149,9 +149,9 @@ export function ChatUI() {
         fetchMessages();
 
     }, [isChatroomOpen, chatRoom, conversations]);
-
+//use a scroll listener that switches the icon from fixed to absolute positioning when you're near the footer
     return (
-        <div className="z-50 bottom-6 right-6 flex flex-col items-end gap-4">
+        <div className="fixed z-50 bottom-6 right-40 flex flex-col items-end gap-4">
             <div className="bottom-60 h-80 flex pr-4 gap-4">
                 {isChatroomOpen && (
                     <div className="bg-white p-4 border rounded-xl shadow-lg">
@@ -183,19 +183,22 @@ export function ChatUI() {
                     </div>
                 )}
             </div>
-            <div className="bottom-6 flex flex-row gap-4">
+            <div className="bottom-6 flex flex-row gap-2 bg-secondary rounded-3xl p-2 shadow-lg justify-start items-center">
                 <Button
                     onClick={() => { setIsOpen(!isOpen); setIsChatroomOpen(false); }}
-                    className="shadow-lg hover:bg-blue-700 transition"
+                    className="shadow-lg"
                 >
                     {isUserSeller ? "Seller Chat" : "Buyer Chat"}
+                    
                 </Button>
-                <Button
+                <Button onClick={() => { setIsUserSeller(!isUserSeller); setIsChatroomOpen(false); }}>⇆</Button>
+
+                {/* <Button
                     onClick={() => { setIsUserSeller(!isUserSeller); setIsChatroomOpen(false); }}
                     className="shadow-lg bg-blue-400 hover:bg-blue-200 text-black transition"
                 >
                     ↺ Switch Chat Mode
-                </Button>
+                </Button> */}
             </div>
         </div>
     )

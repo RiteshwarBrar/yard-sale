@@ -3,7 +3,7 @@
 import { ListingCard } from "@/components/my-listings/listingcard";
 import { useEffect, useState} from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
 export function DisplayListings({
