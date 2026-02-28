@@ -1,7 +1,7 @@
 
 "use client";
 import { ListingCard } from "@/components/my-listings/listingcard";
-import { useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -67,15 +67,20 @@ export function DisplayListings({
             setListings([]);
         }
     }, [page, userID, showActiveListings]);
-        
+
     return (
-        <div className="flex flex-col gap-6">
-            <div className="flex justify-between items-center mb-4">
-                <div className="flex gap-2">
-                    <Button onClick={() => setShowActiveListings(true)}>Active</Button>
-                    <Button onClick={() => setShowActiveListings(false)}>Archived</Button>
+        <div className="flex flex-col justify-between gap-6">
+            <Button onClick={() => router.push("/protected/create-listing")}>Create new listing</Button>
+            <div className="flex flex-col items-center">
+                <h1>My Listings</h1>
+                <div className="flex justify-betweens">
+                    <div className="flex gap-2">
+                        <Button onClick={() => setShowActiveListings(true)}>Active</Button>
+                        <Button onClick={() => setShowActiveListings(false)}>Archived</Button>
+                    </div>
                 </div>
             </div>
+
             <div>
                 {loading ? (
                     <p>Loading...</p>
@@ -84,12 +89,12 @@ export function DisplayListings({
                         {listings.length > 0 ? listings.map((listing) => (
                             <ListingCard key={listing.id} listing={listing} />
                         ))
-                        : (
-                            <div>
-                                <p>No {showActiveListings ? "active" : "archived"} listings yet.</p>
-                                {showActiveListings && <Button onClick={() => router.push("/protected/create-listing")}>Create a listing</Button>}
-                            </div>
-                        )}
+                            : (
+                                <div>
+                                    <p>No {showActiveListings ? "active" : "archived"} listings yet.</p>
+                                    {showActiveListings && <Button onClick={() => router.push("/protected/create-listing")}>Create a listing</Button>}
+                                </div>
+                            )}
                     </div>
                 )}
             </div>

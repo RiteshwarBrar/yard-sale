@@ -2,7 +2,6 @@
 import React from 'react'
 import { useEffect, useState } from "react";
 import { createClient } from '@/lib/supabase/client';
-import { ListingCard } from '@/components/home/listingcard';
 import { Button } from '../ui/button';
 import { useRouter } from 'next/navigation';
 
@@ -73,7 +72,13 @@ export function Listings({
                 <div>
                     <Button onClick={() => router.push("/protected/create-listing")}>Create new listing</Button>
                     {listings.length > 0 ? listings.map((listing) => (
-                        <ListingCard key={listing.id} listing={listing} />
+                        // <ListingCard key={listing.id} listing={listing} />
+                        <div key={listing.id} className="border p-4 rounded mb-4">
+                            <h2 className="text-xl font-bold">{listing.name}</h2>
+                            <p>{listing.description}</p>
+                            <p>${listing.price}</p>
+                            <p className="text-sm text-gray-500">Posted on {new Date(listing.created_at).toLocaleDateString()}</p>
+                        </div>
                     ))
                         : <p>No listings yet.</p>}
                 </div>

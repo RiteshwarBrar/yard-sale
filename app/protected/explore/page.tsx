@@ -1,21 +1,98 @@
-import React from 'react'
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { Listings } from "@/components/explore/listings";
+import { Categories } from "@/components/explore/categories";
+import { minimumListingData, ImageUrls } from "@/components/types/types";
 
-export default function ExplorePage() {
+export default async function ProtectedPage() {
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.getClaims();
+    if (error || !data?.claims) {
+        redirect("/auth/login");
+    }
+    const { data: { user } } = await supabase.auth.getUser();
+    const userID = data?.claims.sub;
 
+    const { data: listings, error: listingsError } = await supabase
+        .from('listings')
+        .select(`
+                    id,
+                    created_by,
+                    created_at,
+                    name:item_name, 
+                    condition,
+                    description,
+                    price
+                `)
+        .neq('created_by', userID)
+        .eq('active', true)
+        .order('created_at', { ascending: false })
+        .range(0, 9);
 
+    if (listingsError) {
+        console.error("Error fetching listings:", listingsError);
+        return <div>Error loading listings.</div>;
+    }
+    const imageUrls: ImageUrls = {};
+    for (const listing of listings) {
+        const folder = `${listing.created_by}/${listing.id}`;
+
+        imageUrls[listing.id] = await fetchImages(folder);
+
+        async function fetchImages(folder: string) {
+            const { data: files, error } = await supabase
+                .storage
+                .from('ListingsMedia')
+                .list(folder);
+
+            if (error) {
+                console.error("Error fetching images:", error);
+                return [];
+            }
+            if (!files || files.length === 0) {
+                // Nothing in this folder; bail early and AVOID calling createSignedUrls
+                return [];
+            }
+            const filePaths = files
+                .filter((f) => !f.name.endsWith("/")) // Exclude folders
+                .map((f) => `${folder}/${f.name}`);
+
+            const { data: urls, error: urlError } = await supabase
+                .storage
+                .from('ListingsMedia')
+                .createSignedUrls(filePaths, 60 * 60); // URLs valid for 60 minutes
+
+            if (urlError) {
+                console.error("Error creating signed URLs:", urlError);
+                return [];
+            }
+            return urls.map((u) => u.signedUrl);
+        }
+    }
+
+    const totalListings = (listings && (listings as any[]).length) || 0;
+    const totalPages = Math.ceil(totalListings / 10);
 
     return (
-        <div>
-            <h1 className='text-2xl font-bold'>Explore Listings</h1>
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10'>
-                {/* Example listing cards */}
-                <div className='border rounded-lg p-4'>
-                    <img src="/placeholder.jpg" alt="Listing Image" className="w-full h-48 object-cover rounded-md" />
-                    <h2 className='text-xl font-semibold mt-4'>Vintage Camera</h2>
-                    <p className='text-gray-600 mt-2'>$150</p>
-                    <p className='text-gray-600 mt-2'>A classic vintage camera in excellent condition. Perfect for collectors and photography enthusiasts.</p>
+        <div className="flex-1 w-full flex flex-col gap-16">
+            <div className="flex flex-col gap-4">
+                <h1 className="text-3xl font-bold">Shop the categories</h1>
+                <div className="flex justify-between items-center">
+                    <h2 className="text-lg text-gray-600">Browse by type</h2>
+                    <p>All categories {'->'}</p>
                 </div>
-        </div>
+                <Categories />
+            </div>
+
+            <div className="flex flex-col gap-4">
+                <h1 className="text-3xl font-bold">See what's new</h1>
+                <div className="flex justify-between items-center">
+                    <h2 className="text-lg text-gray-600">Explore the latest listings from our community</h2>
+                    <p>View all {'->'}</p>
+                </div>
+                <Listings listings={listings} imageUrls={imageUrls} />
+            </div>
+
         </div>
     );
 }

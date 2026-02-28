@@ -82,7 +82,7 @@ export function ChatUI() {
         }
         setPendingOffers(status);
     };
-
+// TODO: try using server actions for these updates
     const updateOfferStatus = async (messageID: string, status: string) => {
         const { data, error } = await supabase
             .from('messages')

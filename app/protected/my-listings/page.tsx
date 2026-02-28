@@ -15,7 +15,6 @@ export default async function Page() {
 
     return (
         <div>
-            <h1>My Listings</h1>
             <DisplayListings userID={userID} />
         </div>
     );
