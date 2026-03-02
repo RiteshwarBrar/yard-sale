@@ -50,7 +50,6 @@ export default async function ProtectedPage() {
                 return [];
             }
             if (!files || files.length === 0) {
-                // Nothing in this folder; bail early and AVOID calling createSignedUrls
                 return [];
             }
             const filePaths = files
@@ -70,13 +69,10 @@ export default async function ProtectedPage() {
         }
     }
 
-    const totalListings = (listings && (listings as any[]).length) || 0;
-    const totalPages = Math.ceil(totalListings / 10);
-
     return (
         <div className="flex-1 w-full flex flex-col gap-16">
             <div className="flex flex-col gap-4">
-                <h1 className="text-3xl font-bold">Shop the categories</h1>
+                <h1 className="text-3xl font-bold text-center">Shop the categories</h1>
                 <div className="flex justify-between items-center">
                     <h2 className="text-lg text-gray-600">Browse by type</h2>
                     <p>All categories {'->'}</p>
@@ -85,11 +81,7 @@ export default async function ProtectedPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-                <h1 className="text-3xl font-bold">See what's new</h1>
-                <div className="flex justify-between items-center">
-                    <h2 className="text-lg text-gray-600">Explore the latest listings from our community</h2>
-                    <p>View all {'->'}</p>
-                </div>
+                <h1 className="text-3xl font-bold text-center">Current Open Listings</h1>
                 <Listings listings={listings} imageUrls={imageUrls} />
             </div>
 
