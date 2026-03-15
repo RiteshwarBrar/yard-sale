@@ -22,7 +22,9 @@ export default async function ProtectedPage() {
                     name:item_name, 
                     condition,
                     description,
-                    price
+                    price,
+                    location,
+                    category
                 `)
         .neq('created_by', userID)
         .eq('active', true)
@@ -33,6 +35,16 @@ export default async function ProtectedPage() {
         console.error("Error fetching listings:", listingsError);
         return <div>Error loading listings.</div>;
     }
+
+    const { data: categories, error: categoriesError } = await supabase
+        .from('categories')
+        .select('*');
+
+    if (categoriesError) {
+        console.error("Error fetching categories:", categoriesError);
+        return <div>Error loading categories.</div>;
+    }
+
     const imageUrls: ImageUrls = {};
     for (const listing of listings) {
         const folder = `${listing.created_by}/${listing.id}`;
@@ -71,17 +83,18 @@ export default async function ProtectedPage() {
 
     return (
         <div className="flex-1 w-full flex flex-col gap-16">
-            <div className="flex flex-col gap-4">
+            <div>Search</div>
+            <div className="flex flex-col gap-6">
                 <h1 className="text-3xl font-bold text-center">Shop the categories</h1>
-                <div className="flex justify-between items-center">
+                {/* <div className="flex justify-between items-center">
                     <h2 className="text-lg text-gray-600">Browse by type</h2>
                     <p>All categories {'->'}</p>
-                </div>
-                <Categories />
+                </div> */}
+                <Categories categories={categories} />
             </div>
 
             <div className="flex flex-col gap-4">
-                <h1 className="text-3xl font-bold text-center">Current Open Listings</h1>
+                <h1 className="text-3xl font-bold text-center">Current Items for Sale</h1>
                 <Listings listings={listings} imageUrls={imageUrls} />
             </div>
 

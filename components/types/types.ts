@@ -23,5 +23,12 @@ export type minimumListingData = {
     description: string;
     created_by: string;
     created_at: string;
+    location:string;
+    category:string;
     condition: "New" | "Like New" | "Good" | "Fair" | "Poor";
+};
+
+export type Category = {
+    id: string;
+    name: string;
 };

@@ -17,14 +17,16 @@ export default async function ProtectedPage() {
 	const { data: listings, error: listingsError } = await supabase
 		.from('listings')
 		.select(`
-						id,
-						created_by,
-						created_at,
-						name:item_name, 
-						condition,
-						description,
-						price
-					`)
+					id,
+                    created_by,
+                    created_at,
+                    name:item_name, 
+                    condition,
+                    description,
+                    price,
+                    location,
+                    category
+				`)
 		.neq('created_by', userID)
 		.eq('active', true)
 		.order('created_at', { ascending: false })

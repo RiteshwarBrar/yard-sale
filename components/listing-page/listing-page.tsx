@@ -1,7 +1,7 @@
 "use client";
 import { createClient } from '@/lib/supabase/client';
 import { useState, useEffect } from 'react'
-import { ListingData } from '../explore/listingcard';
+import { ListingData } from '@/components/types/types';
 import { Button } from '../ui/button';
 
 export function ListingPage({ listingID, userID }: { listingID: string, userID: string }) {
@@ -163,49 +163,39 @@ export function ListingPage({ listingID, userID }: { listingID: string, userID: 
 
 
     return (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 my-6">
+            <div>
+                <h1>{name}</h1>
+                <p>{description}</p>
+            </div>
+            <div>
+                {
+                    imageUrls.length > 0 ? (
+                        <div>
+                            <div style={{ width: 400, height: 300, overflow: "hidden" }}>
+                                <img
+                                    src={imageUrls[index]}
+                                    alt={`Image ${index + 1}`}
+                                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                />
+                            </div>
+                            <button onClick={prev}>Prev</button>
+                            <span> {index + 1} / {imageUrls.length} </span>
+                            <button onClick={next}>Next</button>
+                        </div>
+                    ) : (
+                        <p>No images available</p>
+                    )
+                }
+            </div>
+            <div>
+                <p>{location}</p>
+                <p>${price}</p>
+                {inTalks ? (
+                    <Button className="hover:bg-green-500 z-50" onClick={handleOpenChat}>Open Chat</Button>
+                ) : <Button className="hover:bg-blue-700 z-50" onClick={handleContactSeller}>Contact Seller</Button>}
 
-        <div>
-            {
-                loading ? (
-                    <p> Loading...</p >
-                ) : (
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 my-6">
-                        <div>
-                            <h1>{name}</h1>
-                            <p>{description}</p>
-                        </div>
-                        <div>
-                            {
-                                imageUrls.length > 0 ? (
-                                    <div>
-                                        <div style={{ width: 400, height: 300, overflow: "hidden" }}>
-                                            <img
-                                                src={imageUrls[index]}
-                                                alt={`Image ${index + 1}`}
-                                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                                            />
-                                        </div>
-                                        <button onClick={prev}>Prev</button>
-                                        <span> {index + 1} / {imageUrls.length} </span>
-                                        <button onClick={next}>Next</button>
-                                    </div>
-                                ) : (
-                                    <p>No images available</p>
-                                )
-                            }
-                        </div>
-                        <div>
-                            <p>{location}</p>
-                            <p>${price}</p>
-                            {inTalks ? (
-                                <Button className="hover:bg-green-500 z-50" onClick={handleOpenChat}>Open Chat</Button>
-                            ) : <Button className="hover:bg-blue-700 z-50" onClick={handleContactSeller}>Contact Seller</Button>}
-
-                        </div>
-                    </div>
-                )
-            }
-            <p className="text-red-500">{errorMsg}</p>
+            </div>
         </div>
     )
 }

@@ -16,7 +16,7 @@ export function Listings({
 }) {
 
     return (
-        <div>
+        <div className="gap-4 mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
             {listings.length > 0 ? listings.map((listing) => (
                 <ListingCard key={listing.id} listing={listing} imageUrls={imageUrls} />
             ))

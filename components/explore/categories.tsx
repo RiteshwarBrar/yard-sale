@@ -4,36 +4,16 @@ import { useEffect, useState } from "react";
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '../ui/button';
 import { useRouter } from 'next/navigation';
+import { Category } from '@/components/types/types';
 
-export function Categories() {
+export function Categories({ categories }: { categories: Category[] }) {
     const supabase = createClient();
     const router = useRouter();
-    const [categories, setCategories] = useState<Array<any>>([
-        { id: 1, name: "Electronics" },
-        { id: 2, name: "Furniture" },
-        { id: 3, name: "Clothing" },
-        { id: 4, name: "Books" },
-        { id: 5, name: "Apartments" },
-    ]);
-
-    // useEffect(() => {
-    //     const fetchCategories = async () => {
-    //         const { data, error } = await supabase
-    //             .from('categories')
-    //             .select('*');
-    //         if (error) {
-    //             console.error("Error fetching categories:", error);
-    //             return;
-    //         }
-    //         setCategories(data);
-    //     };
-    //     fetchCategories();
-    // }, []);
 
     return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
         {categories.map((category) => (
-            <Button key={category.id} variant="outline" onClick={() => router.push(`/explore/category/${category.id}`)}>
+            <Button key={category.id} variant="outline" onClick={() => console.log(`Clicked category ${category.name}`)}>
                 {category.name}
             </Button>
         ))}
