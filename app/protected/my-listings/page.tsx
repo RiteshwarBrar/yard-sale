@@ -4,15 +4,19 @@ import { createClient } from "@/lib/supabase/server";
 import { DisplayListings } from "@/components/my-listings/displayUsersListings";
 import { ImageUrls } from "@/components/types/types";
 
-export default async function Page() {
+export default async function Page({
+    searchParams,
+}: {
+    searchParams: Promise<{ active?: string }>;
+}) {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.getClaims();
     if (error || !data?.claims) {
         redirect("/auth/login");
     }
-
+    const { active } = await searchParams;
     const userID = data?.claims.sub;
-    const { data: activeListings, error: activeListingsError } = await supabase
+    const { data: listings, error: listingsError } = await supabase
         .from('listings')
         .select(`
                 id,
@@ -28,43 +32,19 @@ export default async function Page() {
                 location
                 `)
         .eq('created_by', userID)
-        .eq('active', true)
+        .eq('active', active ? active === "true" : true)
         .order('created_at', { ascending: false })
         .range(0, 9);
 
-    if (activeListingsError) {
-        console.error("Error fetching active listings:", activeListingsError);
-        return <div>Error loading active listings.</div>;
+    if (listingsError) {
+        console.error("Error fetching active listings:", listingsError);
+        return <div>Error loading your listings.</div>;
     }
 
-    const { data: archivedListings, error: archivedListingsError } = await supabase
-        .from('listings')
-        .select(`
-                id,
-                active,
-                created_by,
-                name:item_name,
-                created_at,
-                condition,
-                make,
-                model,
-                description,
-                price,
-                location
-                `)
-        .eq('created_by', userID)
-        .eq('active', false)
-        .order('created_at', { ascending: false })
-        .range(0, 9);
-
-    if (archivedListingsError) {
-        console.error("Error fetching archived listings:", archivedListingsError);
-        return <div>Error loading archived listings.</div>;
-    }
 
     const imageUrls: ImageUrls = {};
 
-    for (const listing of [...activeListings, ...archivedListings]) {
+    for (const listing of listings) {
         const folder = `${listing.created_by}/${listing.id}`;
 
         imageUrls[listing.id] = await fetchImages(folder);
@@ -101,7 +81,7 @@ export default async function Page() {
 
     return (
         <div>
-            <DisplayListings userID={userID} activeListings={activeListings} archivedListings={archivedListings} imageUrls={imageUrls} />
+            <DisplayListings userID={userID} listings={listings} imageUrls={imageUrls} showActiveListings={active ? active === "true" : true} />
         </div>
     );
 }

@@ -153,7 +153,7 @@ export function ChatUI() {
 //use a scroll listener that switches the icon from fixed to absolute positioning when you're near the footer
     return (
         <div className="fixed z-50 bottom-6 right-40 flex flex-col items-end gap-4">
-            <div className={cn("bottom-60 h-80 flex pr-4 gap-4", isOpen ? "flex" : "hidden")}>
+            <div className={cn("bottom-60 h-80 flex gap-4", isOpen ? "flex" : "hidden")}>
                 {isChatroomOpen && (
                     <div className="bg-white p-4 border rounded-xl shadow-lg">
                         <RealtimeChat 

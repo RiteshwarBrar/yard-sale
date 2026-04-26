@@ -3,27 +3,33 @@ import { ListingCard } from "@/components/my-listings/listingcard";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ImageUrls, ListingData } from "@/components/types/types";
 
 export function DisplayListings({
     userID,
-    activeListings,
-    archivedListings,
-    imageUrls
+    listings,
+    imageUrls,
+    showActiveListings
 }: {
     userID: string;
-    activeListings: Array<ListingData>;
-    archivedListings: Array<ListingData>;
+    listings: Array<ListingData>;
+    showActiveListings: boolean;
     imageUrls: ImageUrls;
 }) {
     const supabase = createClient();
-    const router = useRouter();
 
     // const [page, setPage] = useState(1);
     // const [loading, setLoading] = useState(false);
-    const [showActiveListings, setShowActiveListings] = useState(true); // TO-DO on reload the previous state of active/archived listings is not preserved, consider adding a toggle or tabs to switch between active and archived listings and preserve the state on reload
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
 
+    function setShowActiveListings(active: boolean) {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("active", active.toString());
+        router.push(`${pathname}?${params.toString()}`);
+    }
 
     return (
         <div className="flex flex-col justify-between gap-6">
@@ -39,19 +45,13 @@ export function DisplayListings({
             </div>
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-3 my-6">
-                {showActiveListings ? (
-                    activeListings.length > 0 ? activeListings.map((listing) => (
+                {
+                    listings.length > 0 ? listings.map((listing) => (
                         <ListingCard key={listing.id} listing={listing} imageUrls={imageUrls} />
                     )) : <div>
                         <p>No {showActiveListings ? "active" : "archived"} listings yet.</p>
                     </div>
-                ) : (
-                    archivedListings.length > 0 ? archivedListings.map((listing) => (
-                        <ListingCard key={listing.id} listing={listing} imageUrls={imageUrls} />
-                    )) : <div>
-                        <p>No {showActiveListings ? "active" : "archived"} listings yet.</p>
-                    </div>
-                )}
+                }
             </div>
         </div>
     );
