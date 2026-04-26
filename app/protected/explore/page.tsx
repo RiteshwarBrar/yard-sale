@@ -1,19 +1,23 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Listings } from "@/components/explore/listings";
-import { Categories } from "@/components/explore/categories";
 import { minimumListingData, ImageUrls } from "@/components/types/types";
 
-export default async function ProtectedPage() {
+export default async function ProtectedPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ category?: string }>;
+}) {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.getClaims();
     if (error || !data?.claims) {
         redirect("/auth/login");
     }
+    const { category: categoryFilter } = await searchParams;
     const { data: { user } } = await supabase.auth.getUser();
     const userID = data?.claims.sub;
 
-    const { data: listings, error: listingsError } = await supabase
+    let query = supabase
         .from('listings')
         .select(`
                     id,
@@ -30,6 +34,12 @@ export default async function ProtectedPage() {
         .eq('active', true)
         .order('created_at', { ascending: false })
         .range(0, 9);
+
+    if (categoryFilter) {
+        query = query.eq('category', categoryFilter)
+    }
+    
+    const { data: listings, error: listingsError } = await query
 
     if (listingsError) {
         console.error("Error fetching listings:", listingsError);
@@ -82,22 +92,6 @@ export default async function ProtectedPage() {
     }
 
     return (
-        <div className="flex-1 w-full flex flex-col gap-16">
-            <div>Search</div>
-            <div className="flex flex-col gap-6">
-                <h1 className="text-3xl font-bold text-center">Shop the categories</h1>
-                {/* <div className="flex justify-between items-center">
-                    <h2 className="text-lg text-gray-600">Browse by type</h2>
-                    <p>All categories {'->'}</p>
-                </div> */}
-                <Categories categories={categories} />
-            </div>
-
-            <div className="flex flex-col gap-4">
-                <h1 className="text-3xl font-bold text-center">Current Items for Sale</h1>
-                <Listings listings={listings} imageUrls={imageUrls} />
-            </div>
-
-        </div>
+        <Listings listings={listings} imageUrls={imageUrls} categories={categories} selectedCategory={categoryFilter || "all"} />
     );
 }
