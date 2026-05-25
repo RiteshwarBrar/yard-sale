@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Listings } from "@/components/home/latest_listings";
-import { CreateListings } from "@/components/home/create_listings";
+import { Listings } from "@/components/home/listings";
+import Sidebar from "@/components/home/HomeSidebar";
 import { ImageUrls } from "@/components/types/types";
 import CompleteSignUpPrompt from "@/components/complete-sign-up/complete-sign-up-prompt";
 
@@ -74,14 +74,20 @@ export default async function ProtectedPage() {
 
 	return (
 
-		<div className="flex-1 w-full flex flex-col gap-12">
+		<div className="flex flex-col bg-white font-sans w-full min-h-screen">
 			{!user?.user_metadata.email || user?.user_metadata.email === "" ? (
 				<CompleteSignUpPrompt />
-			) : (
-				<h1 className="text-5xl font-bold">YardSale</h1>
-			)}
-			<CreateListings />
-			<Listings listings={listings} imageUrls={imageUrls} />
+			) : null}
+
+			{/* <TopBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} /> */}
+			<div className="flex flex-1 overflow-hidden">
+				<Sidebar />
+				{/* <ListingGrid {} /> */}
+				<div className="flex-1 overflow-y-auto p-5 bg-white">
+					<Listings listings={listings} imageUrls={imageUrls} />
+				</div>
+			</div>
+
 
 		</div>
 	);
