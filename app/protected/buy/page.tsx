@@ -97,7 +97,7 @@
 // }
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Listings } from "@/components/buy/listings";
+// import { Listings } from "@/components/buy/listings";
 import { minimumListingData, ImageUrls } from "@/components/types/types";
 import { BuyPageShell } from "@/components/buy/BuyPageShell";
 
@@ -126,7 +126,7 @@ async function fetchImages(
 export default async function BuyPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; condition?: string }>;
 }) {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getClaims();
@@ -135,7 +135,7 @@ export default async function BuyPage({
     redirect("/auth/login");
   }
 
-  const { category: categoryFilter } = await searchParams;
+  const { category: categoryFilter, condition: conditionFilter } = await searchParams;
   const userID = data.claims.sub;
 
   // Build listings query — apply category filter at DB level when present
@@ -159,8 +159,12 @@ export default async function BuyPage({
     .order("created_at", { ascending: false })
     .range(0, 49);
 
-  if (categoryFilter && categoryFilter !== "all") {
+  if (categoryFilter && categoryFilter !== "All") {
     listingsQuery = listingsQuery.eq("category", categoryFilter);
+  }
+
+  if (conditionFilter) {
+    listingsQuery = listingsQuery.eq("condition", conditionFilter);
   }
 
   // Fetch listings and categories in parallel

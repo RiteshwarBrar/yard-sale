@@ -5,7 +5,11 @@ import Sidebar from "@/components/home/HomeSidebar";
 import { ImageUrls } from "@/components/types/types";
 import CompleteSignUpPrompt from "@/components/complete-sign-up/complete-sign-up-prompt";
 
-export default async function ProtectedPage() {
+export default async function ProtectedPage({
+	searchParams
+}: {
+	searchParams: Promise<{ category?: string; condition?: string }>;
+}) {
 	const supabase = await createClient();
 	const { data, error } = await supabase.auth.getClaims();
 	if (error || !data?.claims) {
@@ -13,8 +17,9 @@ export default async function ProtectedPage() {
 	}
 	const { data: { user } } = await supabase.auth.getUser();
 	const userID = data?.claims.sub;
+	const { category: categoryFilter, condition: conditionFilter } = await searchParams;
 
-	const { data: listings, error: listingsError } = await supabase
+	let query = supabase
 		.from('listings')
 		.select(`
 					id,
@@ -31,6 +36,14 @@ export default async function ProtectedPage() {
 		.eq('active', true)
 		.order('created_at', { ascending: false })
 		.range(0, 9);
+
+	if (categoryFilter && categoryFilter.toLowerCase() !== "all") {
+		query = query.eq('category', categoryFilter)
+	}
+	if (conditionFilter) {
+		query = query.eq('condition', conditionFilter)
+	}
+	const { data: listings, error: listingsError } = await query
 
 	if (listingsError) {
 		console.error("Error fetching listings:", listingsError);
@@ -81,7 +94,7 @@ export default async function ProtectedPage() {
 
 			{/* <TopBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} /> */}
 			<div className="flex flex-1 overflow-hidden">
-				<Sidebar />
+				<Sidebar categoryFilter={categoryFilter} conditionFilter={conditionFilter} />
 				{/* <ListingGrid {} /> */}
 				<div className="flex-1 overflow-y-auto p-5 bg-white">
 					<Listings listings={listings} imageUrls={imageUrls} />
