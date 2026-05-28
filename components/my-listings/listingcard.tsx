@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from 'react';
-import { ListingData, ImageUrls } from "@/components/types/types"
+import { ListingData, ImageUrls } from "@/lib/types"
 
 export function ListingCard({
     listing,

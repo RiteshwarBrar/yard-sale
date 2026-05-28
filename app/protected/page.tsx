@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Listings } from "@/components/home/listings";
-import Sidebar from "@/components/home/HomeSidebar";
-import { ImageUrls } from "@/components/types/types";
+import { HomeGrid } from "@/components/home/HomeGrid";
+import { ImageUrls } from "@/lib/types";
 import CompleteSignUpPrompt from "@/components/complete-sign-up/complete-sign-up-prompt";
+import { LISTINGS_BUCKET_URL } from "@/lib/constants";
+import HomeSidebar from "@/components/home/HomeSidebar";
 
 export default async function ProtectedPage({
 	searchParams
@@ -19,7 +20,7 @@ export default async function ProtectedPage({
 	const userID = data?.claims.sub;
 	const { category: categoryFilter, condition: conditionFilter } = await searchParams;
 
-	let query = supabase
+	let listingsQuery = supabase
 		.from('listings')
 		.select(`
 					id,
@@ -30,7 +31,8 @@ export default async function ProtectedPage({
                     description,
                     price,
                     location,
-                    category
+                    category,
+					image_paths
 				`)
 		.neq('created_by', userID)
 		.eq('active', true)
@@ -38,52 +40,26 @@ export default async function ProtectedPage({
 		.range(0, 9);
 
 	if (categoryFilter && categoryFilter.toLowerCase() !== "all") {
-		query = query.eq('category', categoryFilter)
+		listingsQuery = listingsQuery.eq('category', categoryFilter)
 	}
 	if (conditionFilter) {
-		query = query.eq('condition', conditionFilter)
+		listingsQuery = listingsQuery.eq('condition', conditionFilter)
 	}
-	const { data: listings, error: listingsError } = await query
+	const { data: listings, error: listingsError } = await listingsQuery
 
 	if (listingsError) {
 		console.error("Error fetching listings:", listingsError);
 		return <div>Error loading listings.</div>;
 	}
-	const imageUrls: ImageUrls = {};
-	for (const listing of listings) {
-		const folder = `${listing.created_by}/${listing.id}`;
 
-		imageUrls[listing.id] = await fetchImages(folder);
+	const imageUrls: ImageUrls = Object.fromEntries(
+		listings.map(listing => [
+			listing.id,
+			listing.image_paths.map((path: string) => `${LISTINGS_BUCKET_URL}/${path}`)
+		])
+	);
 
-		async function fetchImages(folder: string) {
-			const { data: files, error } = await supabase
-				.storage
-				.from('ListingsMedia')
-				.list(folder);
-
-			if (error) {
-				console.error("Error fetching images:", error);
-				return [];
-			}
-			if (!files || files.length === 0) {
-				return [];
-			}
-			const filePaths = files
-				.filter((f) => !f.name.endsWith("/")) // Exclude folders
-				.map((f) => `${folder}/${f.name}`);
-
-			const { data: urls, error: urlError } = await supabase
-				.storage
-				.from('ListingsMedia')
-				.createSignedUrls(filePaths, 60 * 60); // URLs valid for 60 minutes
-
-			if (urlError) {
-				console.error("Error creating signed URLs:", urlError);
-				return [];
-			}
-			return urls.map((u) => u.signedUrl);
-		}
-	}
+	//TODO: Build functionality to fetch saved listing IDs and enable saving/unsaving listings for the user
 
 	return (
 
@@ -94,10 +70,15 @@ export default async function ProtectedPage({
 
 			{/* <TopBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} /> */}
 			<div className="flex flex-1 overflow-hidden">
-				<Sidebar categoryFilter={categoryFilter} conditionFilter={conditionFilter} />
+				<HomeSidebar categoryFilter={categoryFilter} conditionFilter={conditionFilter} />
 				{/* <ListingGrid {} /> */}
 				<div className="flex-1 overflow-y-auto p-5 bg-white">
-					<Listings listings={listings} imageUrls={imageUrls} />
+					<HomeGrid
+						listings={listings}
+						imageUrls={imageUrls}
+					// savedIds={new Set()}
+					// toggleSaved={(id: string) => { }} // TODO: Implement saved functionality
+					/>
 				</div>
 			</div>
 

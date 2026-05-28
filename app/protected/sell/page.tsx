@@ -2,7 +2,7 @@ import React from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DisplayListings } from "@/components/my-listings/displayUsersListings";
-import { ImageUrls } from "@/components/types/types";
+import { ImageUrls } from "@/lib/types";
 
 export default async function Page({
     searchParams,

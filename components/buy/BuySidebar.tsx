@@ -1,23 +1,26 @@
 "use client";
 
 import {
-  LayoutGrid, Car, Building2, Shirt, Sofa, Smartphone,
-  Dumbbell, Wrench, Gamepad2, BookOpen, Heart, ChevronDown,
+  LayoutGrid, Car, Shirt, Sofa,
+  Wrench, Gamepad2, BookOpen, Heart, ChevronDown,
+  Palette, Home, Tv, Bike,
 } from "lucide-react";
-import { CATEGORIES, Category, CONDITIONS, Condition } from "@/components/types/types";
+import { Category, Condition } from "@/lib/types";
+import { CATEGORIES, CONDITIONS } from '@/lib/constants';
 
-const CATEGORY_ICONS: Record<Category, React.ElementType> = {
-  All: LayoutGrid,
-  Vehicles: Car,
-  "Property rentals": Building2,
-  Apparel: Shirt,
-  "Home & garden": Sofa,
-  Electronics: Smartphone,
-  "Sports & outdoors": Dumbbell,
-  Tools: Wrench,
-  "Toys & games": Gamepad2,
-  "Books & media": BookOpen,
-};
+const CATEGORY_ICONS = {
+     "All": LayoutGrid ,
+    "Vehicles": Car ,
+    "Electronics": Tv ,
+    "Home & garden": Sofa ,
+    "Apparel": Shirt ,
+    "Sports & outdoors": Bike ,
+    "Tools": Wrench ,
+    "Property rentals": Home ,
+    "Toys & games": Gamepad2 ,
+    "Books & media": BookOpen ,
+    "Artwork": Palette ,
+}   
 
 interface BuySidebarProps {
   activeCategory: Category;

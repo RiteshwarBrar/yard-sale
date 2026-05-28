@@ -1,7 +1,7 @@
 "use client";
 import { createClient } from '@/lib/supabase/client';
 import { useState, useEffect } from 'react'
-import { ListingData } from '@/components/types/types';
+import { ListingData } from '@/lib/types';
 import { Button } from '../ui/button';
 
 export function ListingPage({ listingID, userID }: { listingID: string, userID: string }) {

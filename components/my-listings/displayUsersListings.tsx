@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { ImageUrls, ListingData } from "@/components/types/types";
+import { ImageUrls, ListingData } from "@/lib/types";
 
 export function DisplayListings({
     userID,

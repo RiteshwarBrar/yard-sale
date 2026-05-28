@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from 'react';
-import { ImageUrls, minimumListingData } from '@/components/types/types';
-
+import { ImageUrls, MinimumListingData, Condition } from '@/lib/types';
+import { CONDITION_STYLES } from '@/lib/constants';
 // export function ListingCard({
 //     listing,
 //     imageUrls
 // }: {
-//     listing: minimumListingData;
+//     listing: MinimumListingData;
 //     imageUrls: ImageUrls;
 // }) {
 
@@ -57,20 +57,16 @@ import { ImageUrls, minimumListingData } from '@/components/types/types';
 // }
 import { Heart, MapPin } from "lucide-react";
 
-const conditionStyles: Record<string, string> = {
-    "Like new": "bg-[#E7F3FF] text-[#0C447C]",
-    Good: "bg-[#EAF3DE] text-[#27500A]",
-    Fair: "bg-[#FAEEDA] text-[#633806]",
-    Sold: "bg-gray-100 text-gray-400",
-};
-
+interface ListingCardProps {
+    listing: MinimumListingData;
+    imageUrls: ImageUrls;
+    saved?: boolean;
+    onToggleSave?: () => void;
+}
 export function ListingCard({
     listing,
     imageUrls
-}: {
-    listing: minimumListingData;
-    imageUrls: ImageUrls;
-}) {
+}: ListingCardProps) {
     //   const [saved, setSaved] = useState(listing.saved);
     const [saved, setSaved] = useState(false);
 
@@ -115,7 +111,7 @@ export function ListingCard({
                     {listing.location} · {"listing.distance"}
                 </p>
                 <span
-                    className={`inline-block text-[10px] px-2 py-0.5 rounded-full mt-1.5 font-medium ${conditionStyles[listing.condition]
+                    className={`inline-block text-[10px] px-2 py-0.5 rounded-full mt-1.5 font-medium ${CONDITION_STYLES[listing.condition as Condition] ?? "bg-gray-100 text-gray-500"
                         }`}
                 >
                     {listing.condition}

@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { ListingCard } from '@/components/buy/listingcard';
 import { Button } from '../ui/button';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { ImageUrls, minimumListingData, Category } from '@/components/types/types';
+import { ImageUrls, MinimumListingData, Category } from '@/lib/types';
 
 export function Listings({
     listings,
@@ -13,7 +13,7 @@ export function Listings({
     selectedCategory,
     imageUrls
 }: {
-    listings: Array<minimumListingData>;
+    listings: Array<MinimumListingData>;
     categories: Category[];
     selectedCategory: string;
     imageUrls: ImageUrls;
@@ -42,8 +42,8 @@ export function Listings({
                         All
                     </Button>
                     {categories.map((category) => (
-                        <Button key={category.id} variant="outline" onClick={() => handleCategorySelection(category.name)}>
-                            {category.name}
+                        <Button key={category} variant="outline" onClick={() => handleCategorySelection(category)}>
+                            {category}
                         </Button>
                     ))}
 

@@ -1,0 +1,77 @@
+"use client";
+// import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+// import { Button } from '@/components/ui/button';
+// import { useRouter } from "next/navigation";
+// import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from 'react';
+import { MinimumListingData, Condition } from '@/lib/types';
+import { CONDITION_STYLES } from '@/lib/constants';
+import { Heart, MapPin } from "lucide-react";
+import Image from 'next/image';
+
+interface HomeListingCardProps {
+    listing: MinimumListingData;
+    imageUrl: string;
+    saved?: boolean;
+    onToggleSave?: () => void;
+}
+export function HomeListingCard({
+    listing,
+    imageUrl
+}: HomeListingCardProps) {
+    //   const [saved, setSaved] = useState(listing.saved);
+    const [saved, setSaved] = useState(false);
+
+    return (
+        <div className="border border-gray-200 rounded-xl overflow-hidden cursor-pointer hover:border-gray-300 transition-colors group">
+            <div
+                className="relative h-48 overflow-hidden text-4xl"
+            // style={{ backgroundColor: listing.bgColor }}
+            >
+                {
+                    imageUrl ? (
+                        <div className="w-full h-full overflow-hidden">
+                            <Image
+                                src={imageUrl}
+                                alt={`Image for ${listing.name}`}
+                                // className='object-cover w-full aspect-[3/4] rounded-sm'
+                                fill
+                                className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                            />
+                        </div>
+                    ) : (
+                        <p>No images available</p>
+                    )
+                }
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setSaved((s) => !s);
+                    }}
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/85 flex items-center justify-center transition-transform hover:scale-110"
+                    aria-label={saved ? "Unsave listing" : "Save listing"}
+                >
+                    <Heart
+                        size={14}
+                        className={saved ? "fill-red-500 text-red-500" : "text-gray-400"}
+                    />
+                </button>
+            </div>
+            <div className="p-2.5">
+                <p className="text-[15px] font-semibold text-gray-900">{listing.price}</p>
+                <p className="text-[13px] text-gray-500 mt-0.5 truncate">{listing.name}</p>
+                <p className="text-[11px] text-gray-400 mt-1 flex items-center gap-1">
+                    <MapPin size={10} className="shrink-0" />
+                    {listing.location} · {"listing.distance"}
+                </p>
+                <span
+                    className={`inline-block text-[10px] px-2 py-0.5 rounded-full mt-1.5 font-medium ${CONDITION_STYLES[listing.condition as Condition] ?? "bg-gray-100 text-gray-500"
+                        }`}
+                >
+                    {listing.condition}
+                </span>
+            </div>
+        </div>
+    );
+}

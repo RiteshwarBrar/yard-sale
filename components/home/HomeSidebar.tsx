@@ -1,28 +1,29 @@
 "use client";
 import { LayoutGrid, Car, Tv, Sofa, Shirt, Bike, Wrench, Home, Gamepad2, BookOpen, Plus, Palette } from "lucide-react";
 import { useState } from "react";
-import { CONDITIONS, CATEGORIES } from "../types/types";
+import { CONDITIONS, CATEGORIES } from "../../lib/constants";
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import Link from "next/link";
 
-const categoryIcons = [
-    { name: "All", icon: LayoutGrid },
-    { name: "Vehicles", icon: Car },
-    { name: "Electronics", icon: Tv },
-    { name: "Home & garden", icon: Sofa },
-    { name: "Apparel", icon: Shirt },
-    { name: "Sports & outdoors", icon: Bike },
-    { name: "Tools", icon: Wrench },
-    { name: "Property rentals", icon: Home },
-    { name: "Toys & games", icon: Gamepad2 },
-    { name: "Books & media", icon: BookOpen },
-    { name: "Artwork", icon: Palette },
-]
+const CATEGORY_ICONS = {
+    "All": LayoutGrid,
+    "Vehicles": Car,
+    "Electronics": Tv,
+    "Home & garden": Sofa,
+    "Apparel": Shirt,
+    "Sports & outdoors": Bike,
+    "Tools": Wrench,
+    "Property rentals": Home,
+    "Toys & games": Gamepad2,
+    "Books & media": BookOpen,
+    "Artwork": Palette,
+}
 // interface SidebarProps {
 //   activeCategory: string;
 //   setActiveCategory: (cat: string) => void;
 // }
 
-export default function Sidebar({ categoryFilter = "All", conditionFilter = "None" }: { categoryFilter?: string; conditionFilter?: string }) {
+export default function HomeSidebar({ categoryFilter = "All", conditionFilter = "None" }: { categoryFilter?: string; conditionFilter?: string }) {
 
     const [activeCategory, setActiveCategory] = useState(categoryFilter);
     const [selectedCondition, setSelectedCondition] = useState(conditionFilter);
@@ -60,9 +61,9 @@ export default function Sidebar({ categoryFilter = "All", conditionFilter = "Non
                     <Plus size={18} />
                     Create new listing
                 </button>
-                <button className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-[#E7F3FF] hover:text-[#1877F2] transition-colors mb-1">
+                <Link href="/protected/buy" className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-[#E7F3FF] hover:text-[#1877F2] transition-colors mb-1">
                     Browse All
-                </button>
+                </Link>
                 <button className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-[#E7F3FF] hover:text-[#1877F2] transition-colors mb-1">
                     Notifications
                 </button>
@@ -87,14 +88,15 @@ export default function Sidebar({ categoryFilter = "All", conditionFilter = "Non
                 <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1">Categories</p>
 
                 <div className="flex flex-col gap-0.5">
-                    {categoryIcons.map(({ name, icon: Icon }) => {
-                        const active = activeCategory === name;
+                    {CATEGORIES.map((cat) => {
+                        const active = activeCategory === cat;
+                        const Icon = CATEGORY_ICONS[cat];
                         return (
                             <button
-                                key={name}
+                                key={cat}
                                 onClick={() => {
-                                    setActiveCategory(name)
-                                    handleCategorySelection(name)
+                                    setActiveCategory(cat)
+                                    handleCategorySelection(cat)
                                 }}
                                 className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-left w-full ${active
                                     ? "bg-[#E7F3FF] text-[#1877F2] font-medium"
@@ -107,7 +109,7 @@ export default function Sidebar({ categoryFilter = "All", conditionFilter = "Non
                                 >
                                     <Icon size={16} className={active ? "text-[#1877F2]" : "text-gray-500"} />
                                 </div>
-                                {name}
+                                {cat}
                             </button>
                         );
                     })}

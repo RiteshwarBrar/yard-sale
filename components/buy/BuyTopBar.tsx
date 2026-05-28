@@ -1,7 +1,8 @@
 "use client";
 
 import { Search, SlidersHorizontal } from "lucide-react";
-import { SortOption, SORT_OPTIONS } from "@/components/types/types";
+import { SortOption } from "@/lib/types";
+import { SORT_OPTIONS } from "@/lib/constants";
 
 interface BuyTopBarProps {
   query: string;
