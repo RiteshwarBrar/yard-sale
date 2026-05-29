@@ -1,5 +1,5 @@
 "use client";
-import { LayoutGrid, Car, Tv, Sofa, Shirt, Bike, Wrench, Home, Gamepad2, BookOpen, Plus, Palette } from "lucide-react";
+import { LayoutGrid, Car, Tv, Sofa, Shirt, Bike, Wrench, Home, Gamepad2, BookOpen, Plus, Palette, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { CONDITIONS, CATEGORIES } from "../../lib/constants";
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -18,12 +18,17 @@ const CATEGORY_ICONS = {
     "Books & media": BookOpen,
     "Artwork": Palette,
 }
-// interface SidebarProps {
-//   activeCategory: string;
-//   setActiveCategory: (cat: string) => void;
-// }
+interface SidebarProps {
+    //   activeCategory: string;
+    //   setActiveCategory: (cat: string) => void;
+    categoryFilter?: string;
+    conditionFilter?: string
+}
 
-export default function HomeSidebar({ categoryFilter = "All", conditionFilter = "None" }: { categoryFilter?: string; conditionFilter?: string }) {
+export default function HomeSidebar({
+    categoryFilter = "All",
+    conditionFilter = "None"
+}: SidebarProps) {
 
     const [activeCategory, setActiveCategory] = useState(categoryFilter);
     const [selectedCondition, setSelectedCondition] = useState(conditionFilter);
@@ -139,6 +144,18 @@ export default function HomeSidebar({ categoryFilter = "All", conditionFilter = 
                         ))}
                     </div>
                 </div>
+                {(selectedCondition !== "None") && (
+                    <button
+                        onClick={() => {
+                            setSelectedCondition("None");
+                            // conditions reset via parent — pass through
+                        }}
+                        className="text-xs text-[#1877F2] hover:underline text-left px-1 flex items-center gap-1"
+                    >
+                        <ChevronDown size={12} className="rotate-90" />
+                        Clear all filters
+                    </button>
+                )}
             </div>
         </aside>
     );

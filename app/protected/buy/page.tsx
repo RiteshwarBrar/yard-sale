@@ -1,30 +1,10 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { MinimumListingData, ImageUrls } from "@/lib/types";
+import { ImageUrls } from "@/lib/types";
 import { BuyPageShell } from "@/components/buy/BuyPageShell";
 import { LISTINGS_BUCKET_URL } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
-
-async function fetchImages(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  folder: string
-): Promise<string[]> {
-  const { data: files, error } = await supabase.storage
-    .from("ListingsMedia")
-    .list(folder);
-
-  if (error || !files?.length) return [];
-
-  return files
-    .filter((f) => !f.name.endsWith("/"))
-    .map((f) => {
-      const { data } = supabase.storage
-        .from("ListingsMedia")
-        .getPublicUrl(`${folder}/${f.name}`);
-      return data.publicUrl;
-    });
-}
 
 export default async function BuyPage({
   searchParams,
@@ -41,7 +21,6 @@ export default async function BuyPage({
   const { category: categoryFilter, condition: conditionFilter } = await searchParams;
   const userID = data.claims.sub;
 
-  // Build listings query — apply category filter at DB level when present
   let listingsQuery = supabase
     .from("listings")
     .select(
@@ -98,6 +77,8 @@ export default async function BuyPage({
       listings={listings}
       savedIds={[...savedIds]}
       imageUrls={imageUrls}
+      conditionFilter={conditionFilter}
+      categoryFilter={categoryFilter}
     />
   );
 }

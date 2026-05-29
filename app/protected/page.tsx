@@ -13,12 +13,14 @@ export default async function ProtectedPage({
 }) {
 	const supabase = await createClient();
 	const { data, error } = await supabase.auth.getClaims();
+
 	if (error || !data?.claims) {
 		redirect("/auth/login");
 	}
 	const { data: { user } } = await supabase.auth.getUser();
-	const userID = data?.claims.sub;
+	
 	const { category: categoryFilter, condition: conditionFilter } = await searchParams;
+	const userID = data.claims.sub;
 
 	let listingsQuery = supabase
 		.from('listings')
@@ -70,7 +72,10 @@ export default async function ProtectedPage({
 
 			{/* <TopBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} /> */}
 			<div className="flex flex-1 overflow-hidden">
-				<HomeSidebar categoryFilter={categoryFilter} conditionFilter={conditionFilter} />
+				<HomeSidebar
+					categoryFilter={categoryFilter}
+					conditionFilter={conditionFilter}
+				/>
 				{/* <ListingGrid {} /> */}
 				<div className="flex-1 overflow-y-auto p-5 bg-white">
 					<HomeGrid
