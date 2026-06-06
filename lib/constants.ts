@@ -39,4 +39,5 @@ export const CONDITION_STYLES: Record<Condition, string> = {
 };
 
 export const LISTINGS_BUCKET_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/ListingsMedia`;
+export const AVATARS_BUCKET_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars`;
 
