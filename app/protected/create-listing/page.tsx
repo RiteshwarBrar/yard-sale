@@ -2,7 +2,7 @@ import React from "react";
 import NewItemForm from "@/components/create-listing/newListingForm";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { createListing } from "@/app/actions";
+import { createListing } from "@/app/actions/create-listing";
 
 export default async function Page() {
 

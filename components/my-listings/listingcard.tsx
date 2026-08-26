@@ -86,7 +86,7 @@ export function ListingCard({
             </CardContent>
             <CardFooter>
                 <div className="w-full flex justify-between items-center">
-                    <Button variant="outline" onClick={() => router.push(`/listings/${listing.id}`)}>View Details</Button>
+                    <Button variant="outline" onClick={() => router.push(`/listing-page/${listing.id}`)}>View Details</Button>
                     <Button variant="outline" onClick={() => handleArchiveRestore(isActive)}>{isActive ? "Mark as Sold" : "Restore Listing"}</Button>
                 </div>
                 {/* <Button variant="outline" onClick={() => router.push(`/listings/${listing.id}/edit`)}>Edit Listing</Button> */}

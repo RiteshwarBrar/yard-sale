@@ -140,6 +140,8 @@ export function AvatarChangeModal({
 
       setStatus({ msg: "Profile picture updated successfully.", type: "success" });
       onSuccess?.(data.publicUrl);
+      clearFile();
+      onClose();
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Upload failed.";
       setStatus({ msg, type: "error" });

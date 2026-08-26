@@ -30,7 +30,7 @@ export function BuyListingCard({
 
 	return (
 		<Link
-			href={`/listings/${listing.id}`}
+			href={`/listing-page/${listing.id}`}
 			className="group border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 hover:shadow-sm transition-all flex flex-col"
 		>
 			{/* Image area */}

@@ -1,5 +1,5 @@
 "use client";
-import { Search, Bell, MessageCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -33,7 +33,7 @@ export default function NavBar({ profile }: NavBarProps) {
       </div> */}
 
       <nav className="flex gap-1 ml-2">
-        {["Buy", "Sell", "Inbox"].map((tab) => (
+        {["Buy", "Sell", "Profile"].map((tab) => (
           <Link
             key={tab}
             href={`/protected/${tab.toLowerCase()}`}
@@ -45,24 +45,30 @@ export default function NavBar({ profile }: NavBarProps) {
             }`}
           >
             {tab}
-            {tab === "Inbox" && (
+            {/* {tab === "Inbox" && (
               <span className="ml-1.5 bg-red-500 text-white text-[10px] rounded-full px-1.5 py-0.5">
                 3
               </span>
-            )}
+            )} */}
           </Link>
         ))}
       </nav>
 
       <div className="flex items-center gap-2 ml-auto">
-        <button className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+        {/* <button className="p-2 rounded-full hover:bg-gray-100 transition-colors">
           <Bell size={18} className="text-gray-600" />
-        </button>
+        </button> */}
         <button className="p-2 rounded-full hover:bg-gray-100 transition-colors">
           <MessageCircle size={18} className="text-gray-600" />
         </button>
-        <Link href={"/protected/profile"} className="w-8 h-8 rounded-full bg-[#E7F3FF] flex items-center justify-center text-xs font-semibold text-[#1877F2]">
-          {profile?.last_name ? profile?.first_name.charAt(0) + profile?.last_name.charAt(0) : profile?.first_name.charAt(0) || "G"}
+        <Link href={"/protected/profile"} className="w-9 h-9 rounded-full overflow-hidden border-2 border-gray-600 flex items-center justify-center text-xs font-semibold text-[#1877F2]">
+          {profile?.avatar_url ? (
+                            <img src={profile.avatar_url} alt="Avatar" className="object-cover" />
+                        ) : (
+                            <div className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-lg font-medium text-blue-700">
+                                {profile?.last_name ? profile?.first_name.charAt(0) + profile?.last_name.charAt(0) : profile?.first_name.charAt(0)}
+                            </div>
+                        )}
         </Link>
       </div>
     </header>

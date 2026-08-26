@@ -5,6 +5,7 @@ import { Button } from '../ui/button';
 import { createClient } from '@/lib/supabase/client';
 import { RealtimeChat } from '@/components/realtime-chat'
 import { cn } from '@/lib/utils';
+import { MessageCircle } from "lucide-react";
 
 const CHAT_PATHS = ['protected/'];//, 'protected/listing-page/[listingID]/'];
 

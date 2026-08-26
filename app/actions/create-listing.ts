@@ -2,8 +2,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { UUID } from "crypto";
 
-
-
 export async function createListing(ListingData: any) {
     const supabase = await createClient();
     const { data: userData, error: userError } = await supabase.auth.getUser();
