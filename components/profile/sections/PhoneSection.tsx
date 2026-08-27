@@ -3,15 +3,15 @@
 import { useState } from "react";
 import { Loader2, CheckCircle2, AlertCircle, ArrowLeft, Phone as PhoneIcon } from "lucide-react";
 import { UserProfile } from "@/lib/types";
+import { Pencil } from "lucide-react";
 
 interface PhoneSectionProps {
   profile: UserProfile;
-  onUpdate: (p: UserProfile) => void;
 }
 
 type Step = "view" | "enter-new" | "verify";
 
-export function PhoneSection({ profile, onUpdate }: PhoneSectionProps) {
+export function PhoneSection({ profile }: PhoneSectionProps) {
   const [step, setStep] = useState<Step>("view");
   const [newPhone, setNewPhone] = useState("");
   const [code, setCode] = useState("");
@@ -24,7 +24,7 @@ export function PhoneSection({ profile, onUpdate }: PhoneSectionProps) {
   const handleRequestChange = async () => {
     const cleaned = newPhone.replace(/[\s-]/g, "");
     if (!isValidPhone(cleaned)) return setError("Enter a valid phone number with country code, e.g. +91 98765 43210.");
-    if (cleaned === profile.phone) return setError("This is already your current number.");
+    if (cleaned === profile.phone_number) return setError("This is already your current number.");
 
     setLoading(true);
     setError("");
@@ -55,7 +55,7 @@ export function PhoneSection({ profile, onUpdate }: PhoneSectionProps) {
     setError("");
     try {
       // await supabase.auth.verifyOtp({ phone: newPhone, token: code, type: "phone_change" });
-      onUpdate({ ...profile, phone: newPhone, phone_verified: true });
+      // onUpdate({ ...profile, phone: newPhone, phone_verified: true });
       setStep("view");
       setNewPhone("");
       setCode("");
@@ -69,30 +69,28 @@ export function PhoneSection({ profile, onUpdate }: PhoneSectionProps) {
   // ── View ──────────────────────────────────────────────────────────────────
   if (step === "view") {
     return (
-      <div>
-        <h1 className="text-xl font-bold text-gray-900 mb-1">Phone number</h1>
-        <p className="text-sm text-gray-400 mb-6">
-          Used for account recovery and optional SMS notifications.
-        </p>
+      <div className="border border-gray-200 rounded-xl p-4 mb-6">
+        <p className="text-sm font-semibold text-gray-700 mb-3">Phone number</p>
 
-        {profile.phone ? (
-          <div className="border border-gray-200 rounded-xl p-4 flex items-center justify-between mb-4">
-            <div>
-              <p className="text-sm font-medium text-gray-900">{profile.phone}</p>
+        {profile.phone_number ? (
+          <div className="flex items-center justify-between p-2">
+            <div className="flex items-center justify-left gap-2">
+              <p className="text-sm font-medium text-gray-500">{profile.phone_number}</p>
+              <button
+              onClick={() => setStep("enter-new")}
+            >
+              <Pencil size={15} className="text-gray-500 hover:text-gray-700 transition-colors" />
+            </button>
+            </div>
+            {/* phone verified */}
               <div className="flex items-center gap-1.5 mt-1">
-                {profile.phone_verified ? (
+                {true ? (
                   <><CheckCircle2 size={13} className="text-green-600" /><span className="text-xs text-green-600">Verified</span></>
                 ) : (
                   <><AlertCircle size={13} className="text-amber-500" /><span className="text-xs text-amber-600">Not verified</span></>
                 )}
               </div>
-            </div>
-            <button
-              onClick={() => setStep("enter-new")}
-              className="text-sm font-medium text-[#1877F2] hover:underline"
-            >
-              Change
-            </button>
+            
           </div>
         ) : (
           <div className="border border-dashed border-gray-200 rounded-xl p-6 flex flex-col items-center text-center mb-4">
@@ -119,7 +117,7 @@ export function PhoneSection({ profile, onUpdate }: PhoneSectionProps) {
         </button>
 
         <h1 className="text-xl font-bold text-gray-900 mb-1">
-          {profile.phone ? "Change phone number" : "Add phone number"}
+          {profile.phone_number ? "Change phone number" : "Add phone number"}
         </h1>
         <p className="text-sm text-gray-400 mb-6">
           We&apos;ll send an SMS code to confirm this number.

@@ -1,18 +1,21 @@
 "use client";
+import { useState, useEffect, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Loader2, ArrowLeft } from "lucide-react";
+import { updateEmail, verifyOTP } from "@/app/actions/auth";
 
-import { useState } from "react";
-import { Loader2, CheckCircle2, AlertCircle, ArrowLeft } from "lucide-react";
-import { UserProfile } from "@/lib/types";
-
-interface EmailSectionProps {
-  profile: UserProfile;
-  onUpdate: (p: UserProfile) => void;
+interface EmailUpdateFormProps {
+  currentEmail: string;
+  onClose: () => void;
+  onSubmit: (newEmail: string) => void;
 }
 
-type Step = "view" | "enter-new" | "verify";
+type Step = "enter-new" | "verify";
 
-export function EmailSection({ profile, onUpdate }: EmailSectionProps) {
-  const [step, setStep] = useState<Step>("view");
+export function EmailUpdateForm({ currentEmail, onClose, onSubmit }: EmailUpdateFormProps) {
+  const router = useRouter();
+  const [isRefreshing, startTransition] = useTransition();
+  const [step, setStep] = useState<Step>("enter-new");
   const [newEmail, setNewEmail] = useState("");
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,16 +24,29 @@ export function EmailSection({ profile, onUpdate }: EmailSectionProps) {
 
   const isValidEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
+  const resetEmailForm = () => {
+    setStep("enter-new");
+    setNewEmail("");
+    setCode("");
+    setError("");
+    onClose();
+  }
+
+  const resetVerificationForm = () => {
+    setStep("enter-new");
+    setCode("");
+    setError("");
+  }
+
   const handleRequestChange = async () => {
+    if (!newEmail) return setError("Enter a new email address.");
     if (!isValidEmail(newEmail)) return setError("Enter a valid email address.");
-    if (newEmail === profile.email) return setError("This is already your current email.");
+    if (newEmail === currentEmail) return setError("This is already your current email.");
 
     setLoading(true);
     setError("");
     try {
-      // Call your Supabase auth update — this sends a confirmation email/OTP
-      // await supabase.auth.updateUser({ email: newEmail });
-
+      await updateEmail(newEmail);
       setStep("verify");
       setResendCooldown(30);
       startCooldown();
@@ -58,65 +74,38 @@ export function EmailSection({ profile, onUpdate }: EmailSectionProps) {
     setLoading(true);
     setError("");
     try {
-      // Call your Supabase verify endpoint:
-      // await supabase.auth.verifyOtp({ email: newEmail, token: code, type: "email_change" });
+      const result = await verifyOTP("email_change", code, newEmail);
 
-      onUpdate({ ...profile, email: newEmail});
-      setStep("view");
-      setNewEmail("");
-      setCode("");
+      if (result.error) {
+        setError("Invalid or expired code. Try again.");
+        setLoading(false);
+        return;
+      }
+
+      startTransition(() => {
+        router.refresh();
+      });
     } catch {
       setError("Invalid or expired code. Try again.");
-    } finally {
       setLoading(false);
     }
   };
 
-  // ── View: current email ─────────────────────────────────────────────────
-  if (step === "view") {
-    return (
-      <div>
-        <h1 className="text-xl font-bold text-gray-900 mb-1">Email address</h1>
-        <p className="text-sm text-gray-400 mb-6">
-          Used for sign-in and important account notifications.
-        </p>
-
-        <div className="border border-gray-200 rounded-xl p-4 flex items-center justify-between mb-4">
-          <div>
-            <p className="text-sm font-medium text-gray-900">{profile.email}</p>
-            <div className="flex items-center gap-1.5 mt-1">
-              {/* email verified */}
-              {true ? (
-                <>
-                  <CheckCircle2 size={13} className="text-green-600" />
-                  <span className="text-xs text-green-600">Verified</span>
-                </>
-              ) : (
-                <>
-                  <AlertCircle size={13} className="text-amber-500" />
-                  <span className="text-xs text-amber-600">Not verified</span>
-                </>
-              )}
-              
-            </div>
-          </div>
-          <button
-            onClick={() => setStep("enter-new")}
-            className="text-sm font-medium text-[#1877F2] hover:underline"
-          >
-            Change
-          </button>
-        </div>
-      </div>
-    );
-  }
-
+  useEffect(() => {
+    if (loading && !isRefreshing) {
+      onSubmit(newEmail);
+      setNewEmail("");
+      setCode("");
+      setStep("enter-new");
+      setLoading(false);
+    }
+  }, [isRefreshing]);
   // ── Step: enter new email ────────────────────────────────────────────────
   if (step === "enter-new") {
     return (
       <div>
         <button
-          onClick={() => setStep("view")}
+          onClick={() => resetEmailForm()}
           className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-4"
         >
           <ArrowLeft size={14} /> Back
@@ -154,9 +143,9 @@ export function EmailSection({ profile, onUpdate }: EmailSectionProps) {
 
   // ── Step: verify code ────────────────────────────────────────────────────
   return (
-    <div>
+    <div className={isRefreshing ? "opacity-60 pointer-events-none transition-opacity" : "transition-opacity"}>
       <button
-        onClick={() => setStep("enter-new")}
+        onClick={() => resetVerificationForm()}
         className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-4"
       >
         <ArrowLeft size={14} /> Back

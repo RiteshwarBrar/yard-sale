@@ -12,15 +12,15 @@ interface ProfileSidebarProps {
 export function ProfileSidebar({ activeSection, setActiveSection, profile }: ProfileSidebarProps) {
   const initials =
     `${profile.first_name?.[0] ?? ""}${profile.last_name?.[0] ?? ""}`.toUpperCase() || "U";
-    const emailVerified =  true;
-    const phoneVerified =  false;
+  const emailVerified = true;
+  const phoneVerified = false;
 
   const NAV_ITEMS: { label: string; section: ProfileSection; icon: React.ElementType; badge?: boolean }[] = [
     { label: "Profile", section: "profile", icon: User },
+    { label: "Security", section: "security", icon: ShieldCheck },
     { label: "Email address", section: "email", icon: Mail, badge: !emailVerified },
     { label: "Phone number", section: "phone", icon: Phone, badge: !phoneVerified },
     { label: "Password", section: "password", icon: Lock },
-    { label: "Security", section: "security", icon: ShieldCheck },
   ];
 
   return (
@@ -37,15 +37,13 @@ export function ProfileSidebar({ activeSection, setActiveSection, profile }: Pro
               <button
                 key={section}
                 onClick={() => setActiveSection(section)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm w-full text-left transition-colors ${
-                  active
-                    ? "bg-[#E7F3FF] text-[#1877F2] font-semibold"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm w-full text-left transition-colors ${active
+                  ? "bg-[#E7F3FF] text-[#1877F2] font-semibold"
+                  : "text-gray-700 hover:bg-gray-100"
+                  }`}
               >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                  active ? "bg-white" : "bg-gray-100"
-                }`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${active ? "bg-white" : "bg-gray-100"
+                  }`}>
                   <Icon size={15} className={active ? "text-[#1877F2]" : "text-gray-500"} />
                 </div>
                 <span className="flex-1">{label}</span>

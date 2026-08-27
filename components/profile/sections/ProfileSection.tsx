@@ -7,10 +7,9 @@ import { AvatarChangeModal } from '@/components/profile/AvatarChangeModal';
 
 interface ProfileSectionProps {
   profile: UserProfile;
-  onUpdate: (p: UserProfile) => void;
 }
 
-export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
+export function ProfileSection({ profile }: ProfileSectionProps) {
   const [firstName, setFirstName] = useState(profile.first_name);
   const [lastName, setLastName] = useState(profile.last_name);
   const [bio, setBio] = useState(profile.bio ?? "");
@@ -31,7 +30,7 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
     try {
       // Call your server action / Supabase update here:
       // await supabase.from("profiles").update({ first_name: firstName, last_name: lastName, bio }).eq("id", profile.id);
-      onUpdate({ ...profile, first_name: firstName, last_name: lastName, bio });
+      // onUpdate({ ...profile, first_name: firstName, last_name: lastName, bio });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } finally {

@@ -3,6 +3,7 @@ import ProfilePageShell from '@/components/profile/ProfilePageShell'
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from "next/navigation";
 import defaultAvatar from "@/components/assets/images/avatar_placeholder.png";
+import { UserProfile } from '@/lib/types';
 import { init } from 'next/dist/compiled/webpack/webpack';
 
 export default async function page() {
@@ -20,7 +21,7 @@ export default async function page() {
      
 
         // console.log(data);
-        const profile = {
+        const profile:UserProfile = {
             email: userData?.email,
             phone_number: userData?.phone,
             username: userData?.user_name,

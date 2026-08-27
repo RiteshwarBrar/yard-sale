@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { LogOut, Trash2, AlertTriangle, KeyRound } from "lucide-react";
+import { LogOut, Trash2, AlertTriangle, KeyRound, Phone } from "lucide-react";
+import { EmailSection } from "../sections/EmailSection";
 import { UserProfile } from "@/lib/types";
 import { logout } from '@/app/actions/auth'
 import { useTransition } from 'react'
+import { PhoneSection } from "./PhoneSection";
 
 interface SecuritySectionProps {
   profile: UserProfile;
@@ -31,7 +33,7 @@ export function SecuritySection({ profile }: SecuritySectionProps) {
         <p className="text-sm font-semibold text-gray-700 mb-3">Account overview</p>
         <div className="flex flex-col gap-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-gray-400">Member since</span>
+            <span className="text-gray-500">Member since</span>
             <span className="text-gray-700">{memberSince}</span>
           </div>
           {/* <div className="flex justify-between">
@@ -41,6 +43,8 @@ export function SecuritySection({ profile }: SecuritySectionProps) {
         </div>
       </div>
 
+      <EmailSection profile={profile}/>
+      <PhoneSection profile={profile}/>
       <button className="flex items-center gap-2 w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors mb-6">
         <KeyRound size={15} />
         Change Password
